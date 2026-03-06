@@ -13,7 +13,7 @@ import AdminDashboard from './pages/AdminPage'
 import AddProperty from './pages/AddProperty'
 import DormlyAi from './pages/DormlyAi'
 import ChatbotButton from './components/ChatbotButton'
-
+import { Toaster } from './components/ui/sonner'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -31,6 +31,7 @@ function App() {
           <Route path="/admin/add-property" element={<AddProperty />} />
           <Route path='/dormly-ai' element={<DormlyAi/>} />
       </Routes>
+      <Toaster/>
     </>
   )
 }

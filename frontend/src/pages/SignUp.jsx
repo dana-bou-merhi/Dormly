@@ -1,38 +1,71 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Menu, X } from 'lucide-react';
-//import signupimg from '../assets/Signupimage.png';
-import { User, Mail, Lock,  CheckCircle2, Award, DollarSign, Zap } from 'lucide-react';
+import { User, Mail, Lock,  AlertCircle, Award, DollarSign, Zap } from 'lucide-react';
 import { GraduationCap } from "lucide-react";
 import { Input } from '@/components/Input';
 import { Checkbox } from '@/components/ui/checkbox.jsx';
 import { Button } from '@/components/ui/button.jsx';
-
+import { toast } from 'sonner';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const SignUp = () => {
   const [role, setRole] = useState('student');
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: '',
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const navigate = useNavigate();
+  const [user, setUser] = useState({
+    username: '',
     email: '',
     password: '',
-    agreedToTerms: false
+    role: 'student'
   });
 
   const handleRoleChange = (newRole) => {
     setRole(newRole);
+    setUser(prev => ({
+    ...prev,
+    role: newRole
+  }));
   };
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    const { name, value } = e.target;
+    setUser(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', { ...formData, role });
+
+      if (!agreeTerms) {
+    toast.error("You must agree to the terms first.");
+    return;
+  }
+  try {
+    const res = await axios.post(`http://localhost:8002/api/user/register`, user,{
+      headers:{
+        "Content-Type":"application/json"
+      }, 
+      withCredentials: true
+    }); 
+
+    if(res.data.success){
+      toast.success(res.data.message);
+      navigate('/login');
+    }
+    
+  } catch (error) {
+    console.log("Error during registration:", error);
+     setSubmitError(error.response?.data?.message || "Registration failed. Please try again.");
+  //  toast.error(error.response?.data?.message || "Registration failed. Please try again.");
+  }
+
+   // console.log(user);
+
   };
 
   return (
@@ -134,8 +167,8 @@ const SignUp = () => {
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             
-            <Input label="Full Name"  icon={User}   id="fullName"  name="fullName"  type="text" placeholder="John Doe"
-              value={formData.fullName}  onChange={handleInputChange} required  
+            <Input label="Username"  icon={User}   id="username"  name="username"  type="text" placeholder="John Doe"
+              value={user.username}  onChange={handleInputChange} required  
               />
               
               
@@ -146,7 +179,7 @@ const SignUp = () => {
                 name="email"
                 type="email"
                 placeholder={role === 'student' ? 'name@university.edu.lb' : 'landlord@example.com'}
-                value={formData.email}
+                value={user.email}
                 onChange={handleInputChange}
                 required
               />
@@ -168,7 +201,7 @@ const SignUp = () => {
                   name="password"
                   placeholder="••••••••"
                   type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
+                  value={user.password}
                   onChange={handleInputChange}
                   required
                 />
@@ -184,10 +217,10 @@ const SignUp = () => {
 
             
 
-            {/* Terms Checkbox using shadcn/ui */}
+            
               <div className="flex items-start gap-3 py-1">
-                <Checkbox id="terms"  checked={formData.agreedToTerms}  
-                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, agreedToTerms: checked }))}  className="mt-1"/>
+                <Checkbox id="terms"  checked={agreeTerms}  onCheckedChange={(checked) => setAgreeTerms(checked)}
+                 className="mt-1"/>
                 <label className="text-xs text-slate-500 dark:text-slate-400 leading-tight cursor-pointer" htmlFor="terms">
                   By creating an account, I agree to Dormly's{' '}
                   <a className="text-teal-600 hover:underline font-semibold" href="#">
@@ -200,6 +233,13 @@ const SignUp = () => {
                   .
                 </label>
               </div>
+
+                {submitError && (
+                  <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-50 border border-red-200">
+                    <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+                    <p className="text-sm text-red-600">{submitError}</p>
+                  </div>
+                )}
 
              <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold 
              py-6 rounded-xl shadow-lg shadow-teal-600/20 transition-all transform hover:-translate-y-0.5 active:translate-y-0" >
