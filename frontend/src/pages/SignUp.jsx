@@ -46,12 +46,12 @@ const SignUp = () => {
     return;
   }
   try {
-    const res = await axios.post(`http://localhost:8002/api/user/register`, user,{
-      headers:{
-        "Content-Type":"application/json"
-      }, 
-      withCredentials: true
-    }); 
+  const res = await axios.post(`http://127.0.0.1:8000/api/user/register`, user, {
+  headers: {
+    "Content-Type": "application/json"
+  }, 
+  withCredentials: true
+});
 
     if(res.data.success){
       toast.success(res.data.message);
