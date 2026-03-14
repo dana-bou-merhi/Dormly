@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './database/db.js';
 import userRoute from './routes/user.routes.js';
+import propertyRoute from './routes/property.routes.js'
 import cors from 'cors'
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.use(cors({
 app.use(express.urlencoded({ extended: true })); 
 
 app.use("/api/user",userRoute);
+app.use("/api/properties",propertyRoute);
 
 app.listen(PORT, () => {
     connectDB();

@@ -76,6 +76,8 @@ function AmenityBadge({ amenity }) {
     WiFi:        { bg: "bg-blue-50 border-blue-200",     text: "text-blue-700",   icon: "📶" },
     Guarded:     { bg: "bg-slate-50 border-slate-200",   text: "text-slate-600",  icon: "🛡️" },
     Furnished:   { bg: "bg-green-50 border-green-200",   text: "text-green-700",  icon: "🛋️" },
+    Cleaning: { bg: "bg-purple-50 border-purple-200", text: "text-purple-700", icon: "🧹" },
+    AC: { bg: "bg-cyan-50 border-cyan-200", text: "text-cyan-700", icon: "❄️" },
   };
   const c = cfg[amenity] ?? { bg: "bg-gray-50 border-gray-200", text: "text-gray-600", icon: "✓" };
   return (

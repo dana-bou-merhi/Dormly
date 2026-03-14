@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, TrendingDown, Zap, Clock, AlertCircle, Trophy, DollarSign, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button.jsx";
 import ListingCard from "../ListingCards";
 import { Link } from "react-router-dom";
 import InsightCard from "../InsightCard";
-
-const listings = [
+import axios from "axios";
+/*const listings = [
   {
     id: 1,
     title: "Single Apartment LAU",
@@ -116,24 +116,22 @@ const listings = [
     priceTrend: "up",
     priceTrendPct: 2,
   },
-];
+];*/
 
 const SORT_OPTIONS = [
-  { key: "score",     label: "Top Scored",   Icon: Trophy       },
+  { key: "ranking",     label: "Top Ranked",   Icon: Trophy       },
   { key: "price_asc", label: "Best Price",   Icon: DollarSign   },
-  { key: "rating",    label: "Top Rated",    Icon: BarChart2    },
-  { key: "power",     label: "Best Power",   Icon: Zap          },
-  { key: "newest",    label: "Newest",       Icon: Clock        },
+  { key: "score",    label: "Dormly Score",    Icon: BarChart2    },
+  { key: "available",    label: "Available",       Icon: Clock        },
 ];
 
 function sortListings(list, key) {
   const clone = [...list];
   switch (key) {
-    case "score":     return clone.sort((a, b) => b.dormlyScore - a.dormlyScore);
+    case "ranking":     return clone.sort((a, b) => a.rank - b.rank && a.rank !=0);
     case "price_asc": return clone.sort((a, b) => a.price - b.price);
-    case "rating":    return clone.sort((a, b) => b.rating - a.rating || b.reviews - a.reviews);
-    case "power":     return clone.sort((a, b) => (b.powerScore ?? 0) - (a.powerScore ?? 0));
-    case "newest":    return clone.sort((a, b) => b.id - a.id);
+    case "score":    return clone.sort((a, b) => b.dormlyScore - a.dormlyScore || b.rating - a.rating);
+    case "available":    return clone.filter(a => a.availability === "now") 
     default:          return clone;
   }
 }
@@ -141,9 +139,26 @@ function sortListings(list, key) {
 
 
 export default function FeaturesCardListings() {
-  const [sortKey, setSortKey] = useState("score");
-  const sorted = sortListings(listings, sortKey);
+  const [sortKey, setSortKey] = useState("ranking");
+  //const sorted = sortListings(listings, sortKey);
+  const [listings, setListings] = useState([]);
+  const API_URL = import.meta.env.VITE_API_URL;
 
+  useEffect(() =>{
+
+    const fetchProperties= async()=>{
+      try {
+         const res = await axios.get(`${API_URL}/api/properties`);
+        setListings(res.data.properties);
+      } catch (error) {
+        console.log(error);
+      }
+
+    }
+    fetchProperties();
+
+  },[])
+  const sorted = sortListings(listings, sortKey);
   // ── Computed insights ──
   const availableNow = listings.filter(l => l.availability === "now").length;
   const avgScore = (listings.reduce((s, l) => s + l.dormlyScore, 0) / listings.length).toFixed(1);
