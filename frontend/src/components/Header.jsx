@@ -36,6 +36,11 @@ export default function Header() {
             </Link>
             */}
 
+               <Link to="/favorite" className="text-gray-600 font-medium hover:text-teal-600 transition">
+              Favorite
+            </Link>
+            
+
             <Link to="/signup" className="text-gray-600 font-medium hover:text-teal-600 transition">
               Sign Up
             </Link>
