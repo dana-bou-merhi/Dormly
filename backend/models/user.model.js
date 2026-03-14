@@ -1,19 +1,32 @@
 import mongoose from "mongoose";
+import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ['landlord', 'student'], default: 'student' },
-    phone: { type: String },
-    favorites:[{
+    favorites: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Dorms',
         default: []
     }],
     profilePicture: { type: String, default: '' },
     phone: { type: String, default: '' },
-
 }, { timestamps: true });
 
-export const User =mongoose.model('User', userSchema);
+// AUTO-HASH: Updated to modern async syntax (removed 'next')
+userSchema.pre('save', async function () {
+    if (!this.isModified('password')) return;
+
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    // In async middleware, just finishing the function acts as 'next()'
+});
+
+// LOGIN HELPER
+userSchema.methods.comparePassword = async function (enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
+};
+
+export const User = mongoose.model('User', userSchema);
