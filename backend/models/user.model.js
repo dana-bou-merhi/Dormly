@@ -15,14 +15,18 @@ const userSchema = new mongoose.Schema({
     phone: { type: String, default: '' },
 }, { timestamps: true });
 
+
+
 // AUTO-HASH: Updated to modern async syntax (removed 'next')
+
 userSchema.pre('save', async function () {
     if (!this.isModified('password')) return;
 
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    // In async middleware, just finishing the function acts as 'next()'
+   
 });
+
 
 // LOGIN HELPER
 userSchema.methods.comparePassword = async function (enteredPassword) {

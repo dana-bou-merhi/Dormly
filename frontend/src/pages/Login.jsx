@@ -1,39 +1,44 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Added useNavigate
-import axios from 'axios'; // Added axios
+import { Link, useNavigate } from 'react-router-dom'; 
+import axios from 'axios'; 
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import Header from '../components/Header';
 import { Input } from '../components/Input';
 import { Button } from '../components/ui/button';
+import { toast } from 'sonner';
+
 
 export default function Login() {
+
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState(''); // For showing error messages
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+   const API_URL = import.meta.env.VITE_API_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); // Reset error
+    setError(''); 
 
     try {
-      // Connect to your backend URL
-      const response = await axios.post('http://localhost:8000/api/user/login', formData);
+      
+      const response = await axios.post(`${API_URL}/api/user/login`, formData);
 
       if (response.data.token) {
-        // 1. Save token and user info to LocalStorage
+        //  Save token and user info to LocalStorage
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
-
-        console.log("Login Successful!", response.data);
         
-        // 2. Redirect user to home or dashboard
-        navigate('/'); 
+        console.log("Login Successful!", response.data);
+
+         toast.success(`${response.data.message}, Welcome ${response.data.user.username}!`);
+         navigate("/"); 
       }
     } catch (err) {
-      // Handle backend errors (like "Invalid email or password")
+     
       setError(err.response?.data?.message || "Something went wrong. Try again.");
     }
   };
+
 
   return (
     <div className="min-h-screen flex flex-col bg-linear-to-br from-gray-50 to-gray-100 font-sans">
@@ -91,7 +96,34 @@ export default function Login() {
                 </Button>
               </form>
 
-              {/* ... Rest of your UI (Social Login, etc.) stays the same ... */}
+              {/* line */}
+              <div className="relative my-8">
+                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-100"></div></div>
+                <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                  <span className="px-4 bg-white">Social Login</span>
+                </div>
+              </div>
+
+              
+            {/* Social Login */}
+              <div className="grid grid-cols-2 gap-3">
+                <button className="flex items-center justify-center gap-2 py-3 px-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition text-sm font-medium text-gray-700">
+                  <img src="/images/Google icon.png" alt="Google" className="w-5 h-5" />
+                  Google
+                </button>
+                <button className="flex items-center justify-center gap-2 py-3 px-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition text-sm font-medium text-gray-700">
+                  <img src="/images/linkedin logo.png" alt="LinkedIn" className="w-5 h-5" />
+                  LinkedIn
+                </button>
+              </div>
+
+              <p className="text-center text-sm text-gray-600 mt-8">
+                Don't have an account?{' '}
+                <Link to="/signup" className="text-teal-600 hover:text-teal-700 font-semibold">
+                  Sign up here
+                </Link>
+              </p>
+
             </div>
           </div>
         </section>

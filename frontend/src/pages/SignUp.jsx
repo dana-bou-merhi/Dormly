@@ -15,6 +15,8 @@ const SignUp = () => {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [user, setUser] = useState({
     username: '',
     email: '',
@@ -46,7 +48,7 @@ const SignUp = () => {
     return;
   }
   try {
-  const res = await axios.post(`http://127.0.0.1:8000/api/user/register`, user, {
+  const res = await axios.post(`${API_URL}/api/user/register`, user, {
   headers: {
     "Content-Type": "application/json"
   }, 
@@ -63,9 +65,6 @@ const SignUp = () => {
      setSubmitError(error.response?.data?.message || "Registration failed. Please try again.");
   //  toast.error(error.response?.data?.message || "Registration failed. Please try again.");
   }
-
-   // console.log(user);
-
   };
 
   return (
