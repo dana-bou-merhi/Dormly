@@ -1,9 +1,39 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, ChevronDown, LogOut, User, Heart  } from "lucide-react";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import { toast } from "sonner";
+import { setUser } from "@/redux/authSlice";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,AlertDialogTitle, AlertDialogTrigger,} from "@/components/ui/alert-dialog";
+
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const {user} = useSelector(store =>store.auth);
+     const API_URL = import.meta.env.VITE_API_URL;
+     const dispatch = useDispatch();
+     const navigate = useNavigate();
+
+
+  const handleLogout= async(e)=> {
+    try {
+      const res = await axios.get(`${API_URL}/api/user/logout`, {withCredentials: true});
+      if(res.data.success){
+        navigate('/login');
+        dispatch(setUser(null));
+        toast.success(res.data.message);
+
+      }
+    } catch (error) {
+
+      console.log(error)
+      toast.error(error)
+      
+    }
+
+  }
 
   return (
     <header className="w-full top-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm transition-all duration-300 border-b border-slate-200">
@@ -36,18 +66,109 @@ export default function Header() {
             </Link>
             */}
 
-               <Link to="/favorite" className="text-gray-600 font-medium hover:text-teal-600 transition">
-              Favorite
-            </Link>
-            
+            {user ? (
+              <>
+                <Link to="/favorite" className="text-gray-600 font-medium hover:text-teal-600 transition">
+                  Favorites
+                </Link>
 
-            <Link to="/signup" className="text-gray-600 font-medium hover:text-teal-600 transition">
-              Sign Up
-            </Link>
+                {/* User Profile Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-3 cursor-pointer group outline-none">
+                    
+                      <div className="text-right hidden lg:block">
+                        <p className="text-sm  text-slate-800 leading-tight">
+                          {user.username}
+                        </p>
+                        <p className="text-xs text-teal-600 font-medium">
+                          {user.role}
+                        </p>
+                      </div>
 
-            <Link to="/login" className="bg-teal-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-teal-700 transition shadow-lg shadow-teal-600/20">
-              Login
-            </Link>
+                      {/* Avatar with online dot */}
+                      <div className="relative">
+                        <img
+                          src={user.profilePicture || "/images/user.jpeg"}
+                          alt="Profile"
+                          className="w-9 h-9 rounded-full border-2 border-teal-200 group-hover:border-teal-500 transition-all object-cover"
+                        />
+                        <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
+                      </div>
+
+                      
+                      <ChevronDown
+                        size={16}
+                        className="text-slate-400 group-hover:text-teal-600 transition group-data-[state=open]:rotate-180 duration-200"
+                      />
+                    </button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent align="end" className="w-48 mt-2 shadow-lg rounded-xl border border-slate-100">
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
+                        <User size={15} className="text-teal-600" />
+                        <span>Profile</span>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild>
+                      <Link to="/favorite" className="flex items-center gap-2 cursor-pointer">
+                        <Heart size={15} className="text-teal-600" />
+                        <span>Favorites</span>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    {/*<DropdownMenuItem asChild>
+                      <Link to="/logout" className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-600 focus:bg-red-50">
+                        <LogOut size={15} />
+                        <span>Log Out</span>
+                      </Link>
+                    </DropdownMenuItem>*/}
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem  onSelect={(e) => e.preventDefault()} // prevents dropdown from closing before dialog opens
+                          className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-600 focus:bg-red-50">
+                          <LogOut size={15} />
+                          <span>Log Out</span>
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            You will be signed out of your account.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction  onClick={handleLogout}  className="bg-red-500 hover:bg-red-600 text-white"  >
+                            Log Out
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <>
+                <Link to="/signup" className="text-gray-600 font-medium hover:text-teal-600 transition">
+                  Sign Up
+                </Link>
+                <Link
+                  to="/login"
+                  className="bg-teal-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-teal-700 transition shadow-lg shadow-teal-600/20"
+                >
+                  Login
+                </Link>
+              </>
+            )}
+
           </nav>
 
           {/* Mobile Button */}

@@ -94,15 +94,10 @@ export const login = async (req, res) => {
             { expiresIn: "1d" }
         );
 
-        res.status(200).json({
-            message: "Login successful",
+        res.status(200).cookie("token",token,{maxAge: 1*24*60*60*1000,httpOnly: true, sameSite: "strict"}).json({
+            message: `Login successful. Welcome ${user.username}`,
             token,
-            user: {
-                id: user._id,
-                username: user.username,
-                email: user.email,
-                role: user.role
-            }
+            user
         });
 
     } catch (error) {
@@ -112,3 +107,14 @@ export const login = async (req, res) => {
         });
     }
 };
+
+export const logout = async(_, res)=>{
+    try {
+        return res.status(200).cookie("token","",{maxAge:0}).json({
+            success:true,
+            message:"Logout Successfully"
+        })
+    } catch (error) {
+        console.log(error);
+    }
+}

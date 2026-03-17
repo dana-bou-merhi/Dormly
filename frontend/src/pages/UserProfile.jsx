@@ -5,6 +5,7 @@ import Header from '@/components/Header.jsx';
 import Footer from '@/components/Footer.jsx';
 import ChatbotButton from '@/components/ChatbotButton.jsx';
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 
 
 const MOCK_INQUIRIES = [
@@ -167,16 +168,18 @@ function InquiryCard({ inquiry }) {
 export default function UserProfile() {
   const [isEditing, setIsEditing] = useState(false);
   const [inquiries] = useState(MOCK_INQUIRIES);
+  const {user} = useSelector(store =>store.auth);
+  const dispatch = useDispatch();
 
  
   const [profile, setProfile] = useState({
-    fullName:    'Sarah Mansour',
-    email:       'sarah.mansour@ul.edu.lb',
-    phone:       '+961 71 823 456',
-    university:  'Lebanese University (UL)',
-    bio:         '',
-    role:        'Student',
-    profilePicture:      '/images/female student.png',
+    username:    user?.username,
+    email:       user?.email,
+    phone:       user?.phone ||'+961...',
+    university:  user?.uni || 'Lebanese University (UL)',
+    bio:         user?.bio || '',
+    role:        user?.role,
+    profilePicture:     user?.profilePicture|| '/images/user.jpeg',
   });
 
   // Draft state — only committed on Save
@@ -229,7 +232,7 @@ export default function UserProfile() {
                 <div className="relative inline-block mb-5">
                   <img
                     src={profile.profilePicture}
-                    alt={profile.fullName}
+                    alt={profile.username}
                     className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-md mx-auto"
                   />
                   {/* Camera only visible in edit mode */}
@@ -247,7 +250,7 @@ export default function UserProfile() {
                   )}
                 </div>
 
-                <h2 className="text-xl font-bold text-slate-900 mb-0.5">{profile.fullName}</h2>
+                <h2 className="text-xl font-bold text-slate-900 mb-0.5">{profile.username}</h2>
                 <span className="inline-block text-xs font-semibold text-teal-700 bg-teal-50 px-3 py-1 rounded-full mb-5">
                   {profile.role}
                 </span>
@@ -324,8 +327,8 @@ export default function UserProfile() {
                       <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Full Name</label>
                       <input
                         type="text"
-                        value={draft.fullName}
-                        onChange={(e) => setDraft({ ...draft, fullName: e.target.value })}
+                        value={draft.username}
+                        onChange={(e) => setDraft({ ...draft, username: e.target.value })}
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition text-sm"
                       />
                     </div>

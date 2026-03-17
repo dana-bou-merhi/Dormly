@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom'; 
 import axios from 'axios'; 
-import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import Header from '../components/Header';
 import { Input } from '../components/Input';
 import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
+import { useDispatch, useSelector } from 'react-redux';
+import { setLoading, setUser } from '@/redux/authSlice';
 
 
 export default function Login() {
@@ -14,28 +16,37 @@ export default function Login() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
    const API_URL = import.meta.env.VITE_API_URL;
+   const dispatch =useDispatch();
+   const {loading} = useSelector(store =>store.auth)
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); 
 
     try {
-      
-      const response = await axios.post(`${API_URL}/api/user/login`, formData);
+      setLoading(true);
+      const response = await axios.post(`${API_URL}/api/user/login`, formData, 
+        {
+        withCredentials: true
+      });
 
       if (response.data.token) {
         //  Save token and user info to LocalStorage
         localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+       // localStorage.setItem('user', JSON.stringify(response.data.user));
         
         console.log("Login Successful!", response.data);
 
-         toast.success(`${response.data.message}, Welcome ${response.data.user.username}!`);
+         toast.success(`${response.data.message}`);
          navigate("/"); 
+         dispatch(setUser(response.data.user))
       }
     } catch (err) {
      
       setError(err.response?.data?.message || "Something went wrong. Try again.");
+    }
+    finally{
+      setLoading(false);
     }
   };
 
@@ -87,11 +98,18 @@ export default function Login() {
                   </Link>
                 </div>
 
-                <Button
-                  type="submit"
+                <Button type="submit"
                   className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-6 rounded-xl shadow-lg shadow-teal-600/20 transition-all active:scale-95 flex items-center justify-center gap-2 group"
                 >
-                  <span>Login to Dormly</span>
+                  {
+                    loading? 
+                    <>
+                    <Loader2 className='mr-2 w-4 h-4 animate-spin'/> Please Wait
+                    </>
+                    : ("Login To Dormly")
+
+                  }
+                
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </Button>
               </form>
