@@ -25,7 +25,7 @@ export default function Login() {
 
     try {
       setLoading(true);
-      const response = await axios.post(`${API_URL}/api/user/login`, formData, 
+      const response = await axios.post(`http://localhost:8000/api/user/login`, formData, 
         {
         withCredentials: true
       });
@@ -37,9 +37,14 @@ export default function Login() {
         
         console.log("Login Successful!", response.data);
 
+         dispatch(setUser(response.data.user));
          toast.success(`${response.data.message}`);
-         navigate("/"); 
-         dispatch(setUser(response.data.user))
+         const role = response.data.user?.role;
+         if (role === 'admin') {
+           navigate("/admin");
+         } else {
+           navigate("/");
+         }
       }
     } catch (err) {
      

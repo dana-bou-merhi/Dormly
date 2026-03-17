@@ -1,19 +1,157 @@
-import { Property } from "../models/property.model.js";
+import { Property } from '../models/property.model.js';
 
-export const getProperties = async(req, res)=>{
+// ─── GET ALL PROPERTIES (with search + filter + pagination) ──────────────────
+export const getProperties = async (req, res) => {
     try {
-        const dorms= await Property.find();// it get everythinh from the database 
+        const {
+            search, status, type, minPrice, maxPrice, location,
+            page = 1, limit = 10,
+        } = req.query;
+
+        const filter = {};
+
+        if (search) {
+            filter.$or = [
+                { title: { $regex: search, $options: 'i' } },
+                { location: { $regex: search, $options: 'i' } },
+                { description: { $regex: search, $options: 'i' } },
+            ];
+        }
+
+        if (status) filter.status = status;
+        if (type) filter.type = type;
+        if (location) filter.location = { $regex: location, $options: 'i' };
+
+        if (minPrice || maxPrice) {
+            filter.price = {};
+            if (minPrice) filter.price.$gte = Number(minPrice);
+            if (maxPrice) filter.price.$lte = Number(maxPrice);
+        }
+
+        const skip = (Number(page) - 1) * Number(limit);
+        const total = await Property.countDocuments(filter);
+        const properties = await Property.find(filter)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(Number(limit));
+
         res.status(200).json({
             success: true,
-            count: dorms.length,
-            properties: dorms
-        })
-        
+            count: properties.length,
+            total,
+            totalPages: Math.ceil(total / Number(limit)),
+            currentPage: Number(page),
+            properties,
+        });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            messsage:"Failed To fetch the properties from the database"
-        })
-        
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Failed to fetch properties.' });
     }
-}
+};
+
+// ─── GET SINGLE PROPERTY ──────────────────────────────────────────────────────
+export const getPropertyById = async (req, res) => {
+    try {
+        const property = await Property.findById(req.params.id);
+        if (!property) {
+            return res.status(404).json({ success: false, message: 'Property not found.' });
+        }
+        res.status(200).json({ success: true, property });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to fetch property.' });
+    }
+};
+
+// ─── CREATE PROPERTY (Admin) ──────────────────────────────────────────────────
+export const createProperty = async (req, res) => {
+    try {
+        const { title, price, location } = req.body;
+
+        if (!title || !price || !location) {
+            return res.status(400).json({ success: false, message: 'Title, price, and location are required.' });
+        }
+
+        const property = await Property.create(req.body);
+        res.status(201).json({ success: true, message: 'Property created successfully.', property });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Failed to create property.' });
+    }
+};
+
+// ─── UPDATE PROPERTY (Admin) ──────────────────────────────────────────────────
+export const updateProperty = async (req, res) => {
+    try {
+        const property = await Property.findByIdAndUpdate(
+            req.params.id,
+            { $set: req.body },
+            { new: true, runValidators: true }
+        );
+
+        if (!property) {
+            return res.status(404).json({ success: false, message: 'Property not found.' });
+        }
+
+        res.status(200).json({ success: true, message: 'Property updated successfully.', property });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Failed to update property.' });
+    }
+};
+
+// ─── DELETE PROPERTY (Admin) ──────────────────────────────────────────────────
+export const deleteProperty = async (req, res) => {
+    try {
+        const property = await Property.findByIdAndDelete(req.params.id);
+        if (!property) {
+            return res.status(404).json({ success: false, message: 'Property not found.' });
+        }
+        res.status(200).json({ success: true, message: 'Property deleted successfully.' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to delete property.' });
+    }
+};
+
+// ─── ADMIN DASHBOARD STATS ────────────────────────────────────────────────────
+export const getPropertyStats = async (req, res) => {
+    try {
+        const [total, available, comingSoon, full] = await Promise.all([
+            Property.countDocuments(),
+            Property.countDocuments({ status: 'Available Now' }),
+            Property.countDocuments({ status: 'Coming Soon' }),
+            Property.countDocuments({ status: 'Full' }),
+        ]);
+
+        const priceAgg = await Property.aggregate([
+            { $group: { _id: null, avgPrice: { $avg: '$price' }, maxPrice: { $max: '$price' }, minPrice: { $min: '$price' } } },
+        ]);
+
+        const byType = await Property.aggregate([
+            { $group: { _id: '$type', count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+        ]);
+
+        const recentListings = await Property.find()
+            .sort({ createdAt: -1 })
+            .limit(5)
+            .select('title location price status createdAt image');
+
+        res.status(200).json({
+            success: true,
+            stats: {
+                total,
+                available,
+                comingSoon,
+                full,
+                avgPrice: priceAgg[0]?.avgPrice?.toFixed(2) || 0,
+                maxPrice: priceAgg[0]?.maxPrice || 0,
+                minPrice: priceAgg[0]?.minPrice || 0,
+                byType,
+                recentListings,
+            },
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Failed to fetch stats.' });
+    }
+};

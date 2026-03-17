@@ -119,51 +119,80 @@ import axios from "axios";
 ];*/
 
 const SORT_OPTIONS = [
-  { key: "ranking",     label: "Top Ranked",   Icon: Trophy       },
-  { key: "price_asc", label: "Best Price",   Icon: DollarSign   },
-  { key: "score",    label: "Dormly Score",    Icon: BarChart2    },
-  { key: "available",    label: "Available",       Icon: Clock        },
+  { key: "ranking",   label: "Top Ranked",   Icon: Trophy      },
+  { key: "price_asc", label: "Best Price",   Icon: DollarSign  },
+  { key: "score",     label: "Dormly Score", Icon: BarChart2   },
+  { key: "available", label: "Available",    Icon: Clock       },
 ];
 
+// Helper function with safety check for 'list'
 function sortListings(list, key) {
+  if (!list || !Array.isArray(list)) return [];
+  
   const clone = [...list];
   switch (key) {
-    case "ranking":     return clone.sort((a, b) => a.rank - b.rank && a.rank !=0);
-    case "price_asc": return clone.sort((a, b) => a.price - b.price);
-    case "score":    return clone.sort((a, b) => b.dormlyScore - a.dormlyScore || b.rating - a.rating);
-    case "available":    return clone.filter(a => a.availability === "now") 
-    default:          return clone;
+    case "ranking": 
+      // Sort by rank, treat 0 or undefined as lowest priority (Infinity)
+      return clone.sort((a, b) => (a.rank || 999) - (b.rank || 999));
+    case "price_asc": 
+      return clone.sort((a, b) => a.price - b.price);
+    case "score": 
+      return clone.sort((a, b) => (b.dormlyScore || 0) - (a.dormlyScore || 0) || (b.rating || 0) - (a.rating || 0));
+    case "available": 
+      return clone.filter(a => a.availability === "now");
+    default: 
+      return clone;
   }
 }
 
-
-
 export default function FeaturesCardListings() {
   const [sortKey, setSortKey] = useState("ranking");
-  //const sorted = sortListings(listings, sortKey);
   const [listings, setListings] = useState([]);
-  const API_URL = import.meta.env.VITE_API_URL;
+  const [loading, setLoading] = useState(true);
+  
+  // Use a fallback for the API URL
+  const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
-  useEffect(() =>{
-
-    const fetchProperties= async()=>{
+  useEffect(() => {
+    const fetchProperties = async () => {
       try {
-         const res = await axios.get(`${API_URL}/api/properties`);
-        setListings(res.data.properties);
+        setLoading(true);
+        const res = await axios.get(`${API_URL}/api/properties`);
+        // Ensure we set an array even if the backend response is unexpected
+        setListings(res.data.properties || []);
       } catch (error) {
-        console.log(error);
+        console.error("Error fetching properties:", error);
+      } finally {
+        setLoading(false);
       }
-
-    }
+    };
     fetchProperties();
+  }, [API_URL]);
 
-  },[])
-  const sorted = sortListings(listings, sortKey);
-  // ── Computed insights ──
+  // ── Safety Guards for Computed Insights ──
+  const sorted = sortListings(listings || [], sortKey);
+  
   const availableNow = listings.filter(l => l.availability === "now").length;
-  const avgScore = (listings.reduce((s, l) => s + l.dormlyScore, 0) / listings.length).toFixed(1);
-  const lowestPrice = Math.min(...listings.map(l => l.price));
+  
+  const avgScore = listings.length > 0 
+    ? (listings.reduce((s, l) => s + (l.dormlyScore || 0), 0) / listings.length).toFixed(1) 
+    : "0.0";
+
+  const lowestPrice = listings.length > 0 
+    ? Math.min(...listings.map(l => l.price || 0)) 
+    : 0;
+
   const priceDrops = listings.filter(l => l.priceTrend === "down").length;
+
+  // Show a skeleton or loading text while waiting for the backend
+  if (loading) {
+    return (
+      <div className="py-20 text-center flex flex-col items-center gap-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+        <p className="text-teal-600 font-medium">Fetching the best dorms for you...</p>
+      </div>
+    );
+  }
 
   return (
     <section className="py-5 md:py-10 bg-linear-to-b from-white via-teal-50 to-white">
@@ -171,11 +200,11 @@ export default function FeaturesCardListings() {
 
         {/* ── Header ── */}
         <div className="text-center mb-8">
-          <span className="inline-block bg-teal-50 pb-1 text-teal-600 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3 border border-teal-100">
+          <span className="inline-block bg-teal-50 text-teal-600 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3 border border-teal-100">
             Featured Student Housing
           </span>
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-3">
-            Featured Student Housing
+            Top Rated Accommodations
           </h2>
           <p className="text-gray-500 max-w-xl mx-auto text-base">
             All verified, data-scored, and student-approved — updated in real time.
@@ -228,7 +257,7 @@ export default function FeaturesCardListings() {
         {/* ── Cards grid ── */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
           {sorted.map((listing) => (
-            <ListingCard key={listing.id} listing={listing} />
+            <ListingCard key={listing._id || listing.id} listing={listing} />
           ))}
         </div>
 
@@ -246,7 +275,6 @@ export default function FeaturesCardListings() {
     </section>
   );
 }
-
 
 
 /* old design before data driven

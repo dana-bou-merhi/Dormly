@@ -1,21 +1,28 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const authSlice = createSlice({
-      name:"auth",
-    initialState:{
+    name: "auth",
+    initialState: {
         loading: false,
-        user:null
+        user: null,
     },
-    reducers:{
-        // actions
-        setLoading:(state, action)=>{
+    reducers: {
+        setLoading: (state, action) => {
             state.loading = action.payload;
         },
-        setUser:(state, action)=>{
-            state.user= action.payload;
-        }
-    }
-})
+        setUser: (state, action) => {
+            state.user = action.payload;
+        },
+        clearUser: (state) => {
+            state.user = null;
+        },
+    },
+});
 
-export const {setLoading,setUser} = authSlice.actions;
-export default authSlice.reducer; 
+export const { setLoading, setUser, clearUser } = authSlice.actions;
+export default authSlice.reducer;
+
+// Selectors
+export const selectUser = (state) => state.auth.user;
+export const selectIsAdmin = (state) => state.auth.user?.role === 'admin';
+export const selectIsLoading = (state) => state.auth.loading;
