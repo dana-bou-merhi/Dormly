@@ -34,13 +34,14 @@ const propertySchema = new mongoose.Schema({
     rating:      { type: Number, min: 0, max: 5 },
     reviews:     { type: Number, default: 0 },
     dormlyScore: { type: Number, min: 0, max: 10 },
-    powerScore:  { type: Number, min: 0, max: 10 },
-    powerHours:  { type: Number, min: 0, max: 24 },
     rank:        { type: Number },
 
     // ── Amenities (card labels + detail icons in one) ──
     amenityLabels: [{ type: String }],        // ["24/7 Elec", "WiFi", "Furnished"] for home page
     amenities: [{ type: String }],       // ["24/7 Solar Panel 10A", "Fiber WiFi", "Air Conditioning"] — for detail page
+
+    // student packages
+    package: { type: String, default:'essential' },
 
     // ── Nearby Places ──
     nearbyAmenities: [
@@ -51,17 +52,11 @@ const propertySchema = new mongoose.Schema({
     ],
 
     // ── Landlord ──
-  /*  landlord: {
-        user:         { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  verified:     { type: Boolean, default: false },
-  responseTime: { type: String, default: '' },
-      //name:         { type: String },
-      //verified:     { type: Boolean, default: false },
-      //responseTime: { type: String },
-      //avatar:       { type: String },
-     // contactEmail: { type: String },
-     //contactPhone: { type: String },
-    },*/
+    landlord: {
+        user:         { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        verified:     { type: Boolean, default: false },
+        responseTime: { type: String, default: '' },
+    },
 
     // ── Student Reviews ──
    /* studentReviews: [

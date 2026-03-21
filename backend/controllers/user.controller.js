@@ -118,3 +118,39 @@ export const logout = async(_, res)=>{
         console.log(error);
     }
 }
+
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id; // assuming auth middleware sets req.user
+
+    const { username, phone, university, bio } = req.body;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.username = username || user.username;
+    user.phone = phone || user.phone;
+    user.university = university || user.university;
+    user.bio = bio || user.bio;
+
+    // profile image
+    if (req.file) {
+      user.profilePicture = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+      //req.file.path;
+    }
+
+    const updatedUser = await user.save();
+
+    res.status(200).json({
+      success: true,
+      user: updatedUser,
+      message:"Profile Updated Successfully"
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

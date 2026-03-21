@@ -3,10 +3,7 @@ import { Property } from '../models/property.model.js';
 // ─── GET ALL PROPERTIES (with search + filter + pagination) ──────────────────
 export const getProperties = async (req, res) => {
     try {
-        const {
-            search, status, type, minPrice, maxPrice, location,
-            page = 1, limit = 10,
-        } = req.query;
+        const {search, status, type, minPrice, maxPrice, location,   page = 1, limit = 10,  } = req.query;
 
         const filter = {};
 

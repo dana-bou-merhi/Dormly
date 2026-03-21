@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { selectUser, selectIsAdmin, clearUser } from '../redux/authSlice';
 import { setUser } from '../redux/authSlice';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API = import.meta.env.VITE_API_URL;
 
 // ─── Reusable stat card ───────────────────────────────────────────────────────
 function StatCard({ label, value, icon: Icon, bgColor, iconColor, sub }) {
@@ -88,7 +88,7 @@ export default function AdminDashboard() {
     // ── Fetch dashboard stats ─────────────────────────────────────────────────
     const fetchStats = useCallback(async () => {
         try {
-            const res = await fetch(`${API}/admin/stats`, { credentials: 'include' });
+            const res = await fetch(`${API}/api/admin/stats`, { credentials: 'include' });
             const data = await res.json();
             if (data.success) setStats(data.stats);
         } catch (err) {
@@ -105,7 +105,7 @@ export default function AdminDashboard() {
                 ...(listSearch && { search: listSearch }),
                 ...(listStatus && { status: listStatus }),
             });
-            const res = await fetch(`${API}/properties?${params}`, { credentials: 'include' });
+            const res = await fetch(`${API}/api/properties?${params}`, { credentials: 'include' });
             const data = await res.json();
             if (data.success) {
                 setProperties(data.properties);
@@ -128,7 +128,7 @@ export default function AdminDashboard() {
                 ...(userSearch && { search: userSearch }),
                 ...(userRole && { role: userRole }),
             });
-            const res = await fetch(`${API}/admin/users?${params}`, { credentials: 'include' });
+            const res = await fetch(`${API}/api/admin/users?${params}`, { credentials: 'include' });
             const data = await res.json();
             if (data.success) {
                 setUsers(data.users);
@@ -155,7 +155,7 @@ export default function AdminDashboard() {
         if (!window.confirm('Delete this property? This cannot be undone.')) return;
         setDeletingId(id);
         try {
-            const res = await fetch(`${API}/properties/${id}`, {
+            const res = await fetch(`${API}/api/properties/${id}`, {
                 method: 'DELETE',
                 credentials: 'include',
             });
@@ -179,7 +179,7 @@ export default function AdminDashboard() {
         if (!window.confirm('Delete this user? This cannot be undone.')) return;
         setDeletingId(id);
         try {
-            const res = await fetch(`${API}/admin/users/${id}`, {
+            const res = await fetch(`${API}/api/admin/users/${id}`, {
                 method: 'DELETE',
                 credentials: 'include',
             });
@@ -201,7 +201,7 @@ export default function AdminDashboard() {
     // ── Update user role ──────────────────────────────────────────────────────
     const handleRoleChange = async (userId, newRole) => {
         try {
-            const res = await fetch(`${API}/admin/users/${userId}/role`, {
+            const res = await fetch(`${API}/api/admin/users/${userId}/role`, {
                 method: 'PUT',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
@@ -221,7 +221,7 @@ export default function AdminDashboard() {
 
     // ── Logout ────────────────────────────────────────────────────────────────
     const handleLogout = async () => {
-        await fetch(`${API}/user/logout`, { credentials: 'include' });
+        await fetch(`${API}/api/user/logout`, { credentials: 'include' });
         dispatch(clearUser());
         navigate('/login');
     };

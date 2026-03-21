@@ -25,7 +25,7 @@ export default function Login() {
 
     try {
       setLoading(true);
-      const response = await axios.post(`http://localhost:8000/api/user/login`, formData, 
+      const response = await axios.post(`${API_URL}/api/user/login`, formData, 
         {
         withCredentials: true
       });

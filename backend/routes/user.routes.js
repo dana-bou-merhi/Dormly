@@ -1,33 +1,22 @@
 import express from "express";
-import { register, login, logout } from "../controllers/user.controller.js";
+import { register, login, logout, updateProfile } from "../controllers/user.controller.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
 import { User } from "../models/user.model.js";
+import { upload } from "../middleware/upload.js";
 
 const router = express.Router();
 
 router.post("/register", register);
 router.post("/login", login);
 router.get("/logout", logout);
+router.put('/update_profile',isAuthenticated,upload.single('profilePicture'),updateProfile);
+
 
 // Get current logged-in user (used by frontend Redux on page load)
 router.get("/me", isAuthenticated, (req, res) => {
     res.status(200).json({ success: true, user: req.user });
 });
 
-// Update profile (username, phone, profilePicture)
-router.put("/profile", isAuthenticated, async (req, res) => {
-    try {
-        const { username, phone, profilePicture } = req.body;
-        const user = await User.findByIdAndUpdate(
-            req.user._id,
-            { $set: { username, phone, profilePicture } },
-            { new: true }
-        ).select("-password");
-        res.status(200).json({ success: true, user });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Failed to update profile." });
-    }
-});
 
 // Toggle favorite
 router.put("/favorites/:propertyId", isAuthenticated, async (req, res) => {

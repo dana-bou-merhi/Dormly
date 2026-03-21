@@ -15,7 +15,8 @@ import ChatbotButton from './components/ChatbotButton'
 import { Toaster } from './components/ui/sonner'
 import FavoriteDorms from './pages/FavoriteDorms'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
+const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 function App() {
   const dispatch = useDispatch();
@@ -24,7 +25,7 @@ function App() {
   useEffect(() => {
     const fetchMe = async () => {
       try {
-        const res = await fetch(`${API}/user/me`, { credentials: 'include' });
+        const res = await fetch(`${API}/api/user/me`, { credentials: 'include' });
         const data = await res.json();
         if (data.success) dispatch(setUser(data.user));
       } catch {
@@ -48,6 +49,7 @@ function App() {
         <Route path="/admin/edit-property/:id" element={<AddProperty />} />
         <Route path="/dormly-ai"               element={<DormlyAi />} />
         <Route path="/favorite"                element={<FavoriteDorms />} />
+       
       </Routes>
       <ChatbotButton />
       <Toaster />

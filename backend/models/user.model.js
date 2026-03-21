@@ -11,8 +11,10 @@ const userSchema = new mongoose.Schema({
         ref: 'Dorms',
         default: []
     }],
-    profilePicture: { type: String, default: '' },
+    profilePicture: { type: String, default: '/images/user.jpeg' },
     phone: { type: String, default: '' },
+    university:{type: String, default:'Lebanese University'},
+    bio:{type: String, default:''}
 }, { timestamps: true });
 
 

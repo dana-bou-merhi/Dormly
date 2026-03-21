@@ -158,7 +158,7 @@ export default function FeaturesCardListings() {
       try {
         setLoading(true);
         const res = await axios.get(`${API_URL}/api/properties`);
-        // Ensure we set an array even if the backend response is unexpected
+        
         setListings(res.data.properties || []);
       } catch (error) {
         console.error("Error fetching properties:", error);
@@ -169,7 +169,7 @@ export default function FeaturesCardListings() {
     fetchProperties();
   }, [API_URL]);
 
-  // ── Safety Guards for Computed Insights ──
+
   const sorted = sortListings(listings || [], sortKey);
   
   const availableNow = listings.filter(l => l.availability === "now").length;
@@ -184,7 +184,7 @@ export default function FeaturesCardListings() {
 
   const priceDrops = listings.filter(l => l.priceTrend === "down").length;
 
-  // Show a skeleton or loading text while waiting for the backend
+ 
   if (loading) {
     return (
       <div className="py-20 text-center flex flex-col items-center gap-4">
@@ -257,7 +257,7 @@ export default function FeaturesCardListings() {
         {/* ── Cards grid ── */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
           {sorted.map((listing) => (
-            <ListingCard key={listing._id || listing.id} listing={listing} />
+            <ListingCard key={listing._id} listing={listing} />
           ))}
         </div>
 

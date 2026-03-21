@@ -5,9 +5,9 @@ import { Card } from '@/components/ui/card.jsx';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API = import.meta.env.VITE_API_URL;
 
-const AMENITY_OPTIONS = ['Free Wi-Fi', 'AC Units', 'Generator 24/7', 'Daily Cleaning', 'Laundry Room', 'Security Cameras', 'Elevator', 'Rooftop Access', 'Parking'];
+const AMENITY_OPTIONS = ['WiFi', 'AC Units', '24/7 Elect', 'Cleaning', 'Laundry Room', 'Security Cameras', 'Elevator', 'Rooftop Access', 'Parking'];
 const TYPE_OPTIONS    = ['Single Studio', 'Single Room', 'Double Shared Room', 'Apartment', 'Luxury Apartment', 'Modern Studio'];
 const STATUS_OPTIONS  = ['Available Now', 'Coming Soon', 'Full'];
 const FURNISH_OPTIONS = ['Fully Furnished', 'Semi Furnished', 'Unfurnished'];
@@ -78,7 +78,7 @@ export default function AddProperty() {
         setSubmitting(true);
         try {
             const method = isEditing ? 'PUT' : 'POST';
-            const url    = isEditing ? `${API}/properties/${id}` : `${API}/properties`;
+            const url    = isEditing ? `${API}/api/properties/${id}` : `${API}/api/properties`;
 
             const payload = {
                 ...formData,

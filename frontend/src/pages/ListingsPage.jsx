@@ -21,12 +21,12 @@ export default function ListingsPage() {
   });
   const [sortBy, setSortBy] = useState('Recommended');
 
-  // ── Fetch from backend ──────────────────────────────────────────────────────
+  
   useEffect(() => {
     const fetch_ = async () => {
       try {
         setLoading(true);
-        const res  = await fetch(`${API_URL}/properties?limit=100`);
+        const res  = await fetch(`${API_URL}/api/properties?limit=100`);
         const data = await res.json();
         if (data.success) setAllListings(data.properties);
       } catch (err) {
@@ -38,7 +38,7 @@ export default function ListingsPage() {
     fetch_();
   }, []);
 
-  // ── Filter ──────────────────────────────────────────────────────────────────
+
   const filteredListings = useMemo(() => {
     return allListings.filter(l => {
       if (filters.location !== 'All' && !l.location?.toLowerCase().includes(filters.location.toLowerCase())) return false;
@@ -55,7 +55,7 @@ export default function ListingsPage() {
     });
   }, [allListings, filters]);
 
-  // ── Sort ────────────────────────────────────────────────────────────────────
+
   const sortedListings = useMemo(() => {
     const sorted = [...filteredListings];
     switch (sortBy) {

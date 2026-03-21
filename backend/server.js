@@ -19,6 +19,8 @@ app.use(cors({
     credentials: true,
 }));
 app.use(express.urlencoded({ extended: true }));
+//new added to give access to the upload folder 
+app.use("/uploads", express.static("uploads"));
 
 app.use('/api/user', userRoute);
 app.use('/api/properties', propertyRoute);

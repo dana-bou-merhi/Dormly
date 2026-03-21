@@ -48,7 +48,7 @@ const SignUp = () => {
     return;
   }
   try {
-  const res = await axios.post(`http://127.0.0.1:8000/api/user/register`, user, {
+  const res = await axios.post(`${API_URL}/api/user/register`, user, {
   headers: {
     "Content-Type": "application/json"
   }, 

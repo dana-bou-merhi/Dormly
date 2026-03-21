@@ -103,7 +103,7 @@ function Stars({ rating }) {
 export default function ListingCard({ listing }) {
   const [isFavorited, setIsFavorited] = useState(false);
 
-  const {id, title, location, image, rating, reviews, price, priceUnit, amenities = [],
+  const {_id, title, location, image, rating, reviews, price, priceUnit, amenities = [],
     // NEW data fields
     rank,
     availability = "now",   // "now" | "soon" | "full"
@@ -202,7 +202,7 @@ export default function ListingCard({ listing }) {
             {availability === "full" ? (
               <span className="flex items-center gap-1"><Users className="w-3 h-3" /> Join Waitlist</span>
             ) : (
-              <Link to={`/property/${id}`}>View Details →</Link>
+              <Link to={`/property/${_id}`}>View Details →</Link>
             )}
           </Button>
         </div>

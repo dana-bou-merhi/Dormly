@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pencil, X, Check, User, Lock, Mail, Phone, School,ArrowDown, Camera, BookOpen, MessageCircle, ChevronRight, Clock, CheckCheck, XCircle, Home,} from 'lucide-react';
 import { Button } from '@/components/ui/button.jsx';
 import Header from '@/components/Header.jsx';
@@ -6,7 +6,8 @@ import Footer from '@/components/Footer.jsx';
 import ChatbotButton from '@/components/ChatbotButton.jsx';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-
+import axios from 'axios';
+import { toast } from 'sonner';
 
 const MOCK_INQUIRIES = [
   {
@@ -170,20 +171,50 @@ export default function UserProfile() {
   const [inquiries] = useState(MOCK_INQUIRIES);
   const {user} = useSelector(store =>store.auth);
   const dispatch = useDispatch();
+   const API_URL = import.meta.env.VITE_API_URL;
 
  
-  const [profile, setProfile] = useState({
+  /*const [profile, setProfile] = useState({
     username:    user?.username,
     email:       user?.email,
     phone:       user?.phone ||'+961...',
-    university:  user?.uni || 'Lebanese University (UL)',
+    university:  user?.university || 'Lebanese University (UL)',
     bio:         user?.bio || '',
     role:        user?.role,
     profilePicture:     user?.profilePicture|| '/images/user.jpeg',
   });
 
   // Draft state — only committed on Save
-  const [draft, setDraft] = useState({ ...profile });
+  const [draft, setDraft] = useState({ ...profile });*/
+  const [profile, setProfile] = useState({
+  username: "",
+  email: "",
+  phone: "+961...",
+  university: "Lebanese University (UL)",
+  bio: "",
+  role: "",
+  profilePicture: "/images/user.jpeg",
+});
+
+// Draft state — only committed on Save
+const [draft, setDraft] = useState(profile);
+
+useEffect(() => {
+  if (!user) return;
+
+  const newProfile = {
+    username: user.username || "",
+    email: user.email || "",
+    phone: user.phone || "+961...",
+    university: user.university || "Lebanese University (UL)",
+    bio: user.bio || "",
+    role: user.role || "",
+    profilePicture: user.profilePicture || "/images/user.jpeg",
+  };
+
+  setProfile(newProfile);
+  setDraft(newProfile);
+}, [user]);
 
   const handleEdit = () => {
     setDraft({ ...profile });
@@ -195,21 +226,64 @@ export default function UserProfile() {
     setIsEditing(false);
   };
 
-  const handleSave = (e) => {
-    e.preventDefault();
-    setProfile({ ...draft });
-    setIsEditing(false);
+  const handleSave = async(e) => {
+    //e.preventDefault();
+   // setProfile({ ...draft });
+    //setIsEditing(false);
+     e.preventDefault();
+
+  try {
+    const formData = new FormData();
+
+    formData.append("username", draft.username);
+    formData.append("phone", draft.phone);
+    formData.append("university", draft.university);
+    formData.append("bio", draft.bio);
+
+    if (draft.profileFile) {
+      formData.append("profilePicture", draft.profileFile);
+    }
+
+    const res = await axios.put(`${API_URL}/api/user/update_profile`, formData, { withCredentials: true})
+
+    const data = res.data;
+
+    if (data.success) {
+      setProfile(data.user);
+
+      toast.success(data.message);   // backend message
+      setIsEditing(false);           // close edit mode
+    }
+
+  } catch (error) {
+    toast.error(  error.response?.data?.message || "Profile update failed" );
+  }
+
   };
 
 
-  const handleAvatarChange = (e) => {
+ /* const handleAvatarChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const objectUrl = URL.createObjectURL(file);
     setDraft((prev) => ({ ...prev, profilePicture: objectUrl }));
     // Also update profile.avatar preview immediately so the sidebar reflects it
     setProfile((prev) => ({ ...prev, profilePicture: objectUrl }));
-  };
+  };*/
+// new to match bckend
+  const handleAvatarChange = (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const objectUrl = URL.createObjectURL(file);
+
+  setDraft((prev) => ({...prev, profilePicture: objectUrl, profileFile: file }));
+
+  setProfile((prev) => ({
+    ...prev,
+    profilePicture: objectUrl
+  }));
+};
 
   const pendingCount = inquiries.filter((i) => i.status === 'pending').length;
   const repliedCount = inquiries.filter((i) => i.status === 'replied').length;
@@ -260,9 +334,6 @@ export default function UserProfile() {
                   <InfoRow icon={Mail}     label="Email"       value={profile.email} />
                   <InfoRow icon={Phone}    label="Phone"       value={profile.phone} />
                   <InfoRow icon={School}   label="University"  value={profile.university} />
-                  {profile.bio && (
-                    <InfoRow icon={BookOpen} label="Bio" value={profile.bio} />
-                  )}
                 </div>
 
                 {/* Edit / Cancel toggle */}
