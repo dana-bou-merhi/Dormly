@@ -13,41 +13,6 @@ import PropertyLocation from '@/components/PropertyLocation';
 import axios from 'axios';
 
 const PROPERTY_DATA = {
-  id: 1,
-  title: 'Hamra Student Studio',
-  price: 300,
-  baseRent: 250,
-  utilities: 50,
-  location: 'Hamra Street, Beirut, Lebanon',
-  distance: '5 min from LAU',
-  rating: 4.8,
-  reviews: 12,
-  type: 'Single Studio',
-  status: 'Available Now',
-  furnishing: 'Fully Furnished',
-  availableFrom: '1 March, 2026',
-  description: 'Modern and secure studio located in the heart of Hamra. Designed specifically for university students, this studio offers a quiet study environment with all the essentials. Just a 5-minute walk to AUB and 8 minutes to LAU. The building features 24/7 security and a dedicated study lounge for residents.',
-  images: [
-    '/images/Dorm4.jpg',
-    '/images/kitchen.jpg',
-    '/images/citting room.jpg',
-    '/images/bathroom.jpg',
-    '/images/outsideDorm.jpg',
-  ],
-  amenities: [
-    { icon: Zap, label: '24/7 Solar Panel 10A' },
-    { icon: Wifi, label: 'Fiber WiFi' },
-    { icon: Snowflake, label: 'Air Conditioning' },
-    { icon: Home, label: 'Private Balcony' },
-    { icon: ArrowUp, label: 'High Speed Elevator' },
-    { icon: Sparkles, label: 'Weekly cleaning' },
-  ],
-  nearbyAmenities: [
-    { name: 'American University of Beirut', distance: '5 min Walk' },
-    { name: 'Hamra Pharmacy', distance: '2 min Walk' },
-    { name: 'Supermarket', distance: '5 min Walk' },
-    { name: 'Public Transport Hub', distance: '5 min Walk' },
-  ],
   landlord: {
     name: 'John',
     verified: true,
@@ -157,7 +122,7 @@ export default function PropertyDetails() {
                  
                 <span className="text-gray-500 px-2 py-2">{property.distance}</span>
 
-                 {property.package && property.package !== 'essential' && (
+                 {property.package && property.package !== 'Essential' && (
                       <Badge className={property.package === 'Premium' 
                           ? 'bg-amber-100 text-amber-700 border border-amber-200' 
                           : 'bg-blue-100 text-blue-700 border border-blue-200'}>
@@ -244,7 +209,7 @@ export default function PropertyDetails() {
          
           
           <PropertyCostSidebar price={property.price} baseRent={property.baseRent} utilities={property.utilities} 
-          availableFrom={property.availableFrom} landlord={PROPERTY_DATA.landlord} />
+          availableFrom={property.availableFrom} landlord={property.landlord} />
         </div>
       </main>
 

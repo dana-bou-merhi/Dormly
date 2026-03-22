@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { GraduationCap, ChevronDown, LogOut, User, Heart  } from "lucide-react";
+import { GraduationCap, ChevronDown, LogOut, User, Heart, Home, Plus  } from "lucide-react";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
@@ -118,6 +118,35 @@ export default function Header() {
                         <span>Favorites</span>
                       </Link>
                     </DropdownMenuItem>
+
+                    {/*New added for specific roles*/ }
+
+                    {user?.role === "admin" && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
+                        <GraduationCap size={15} className="text-teal-600" />
+                        <span>Admin Dashboard</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+
+                    {user?.role === "landlord" && (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link to="/new-prop" className="flex items-center gap-2 cursor-pointer">
+                            <Plus size={15} className="text-teal-600" />
+                            <span>Add Property</span>
+                          </Link>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem asChild>
+                          <Link to="/my-properties" className="flex items-center gap-2 cursor-pointer">
+                            <Home size={15} className="text-teal-600" />
+                            <span>My Properties</span>
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
 
                     <DropdownMenuSeparator />
 

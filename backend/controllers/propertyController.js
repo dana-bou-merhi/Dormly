@@ -1,6 +1,6 @@
 import { Property } from '../models/property.model.js';
 
-// ─── GET ALL PROPERTIES (with search + filter + pagination) ──────────────────
+// ─── GET ALL PROPERTIES (with search + filter + pagination)
 export const getProperties = async (req, res) => {
     try {
         const {search, status, type, minPrice, maxPrice, location,   page = 1, limit = 10,  } = req.query;
@@ -46,10 +46,10 @@ export const getProperties = async (req, res) => {
     }
 };
 
-// ─── GET SINGLE PROPERTY ──────────────────────────────────────────────────────
+// ─── GET SINGLE PROPERTY 
 export const getPropertyById = async (req, res) => {
     try {
-        const property = await Property.findById(req.params.id);
+        const property = await Property.findById(req.params.id).populate("landlord.user", "username email profilePicture");
         if (!property) {
             return res.status(404).json({ success: false, message: 'Property not found.' });
         }
@@ -59,7 +59,7 @@ export const getPropertyById = async (req, res) => {
     }
 };
 
-// ─── CREATE PROPERTY (Admin) ──────────────────────────────────────────────────
+// ─── CREATE PROPERTY (Admin) 
 export const createProperty = async (req, res) => {
     try {
         const { title, price, location } = req.body;
@@ -150,5 +150,68 @@ export const getPropertyStats = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Failed to fetch stats.' });
+    }
+};
+
+
+// lanlord add property 
+
+export const createPropertyWithId = async (req, res) => {
+    try {
+        const user = req.user; 
+        if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+        if (user.role !== "landlord" && user.role!=="admin") {
+            return res.status(403).json({ message: "Only landlords can add properties." });
+        }
+
+       // const amenities       = req.body.amenities ? JSON.parse(req.body.amenities) : [];
+       
+        const amenityLabels   = req.body.amenityLabels ? JSON.parse(req.body.amenityLabels) : [];
+        const nearbyAmenities = req.body.nearbyAmenities ? JSON.parse(req.body.nearbyAmenities) : [];
+        const amenities = amenityLabels.slice(0, 3);
+
+        const baseUrl = `${req.protocol}://${req.get("host")}`; // e.g., http://localhost:8002
+
+    const images = req.files?.map(file => `${baseUrl}/uploads/properties/${file.filename}`) || [];
+    const image = images[0] || ""; // first image as main cover
+
+          
+   // console.log('Body:', req.body); 
+
+        const property = await Property.create({
+            title:        req.body.title,
+            description:  req.body.description,
+            type:         req.body.type,
+            status:       req.body.status,
+            furnishing:   req.body.furnishing,
+            location:     req.body.location,
+            distance:     req.body.distance,
+            price:        req.body.price,
+            baseRent:     req.body.baseRent,
+            utilities:    req.body.utilities,
+            package:      req.body.packageType,
+            reviews:      req.body.reviews || 0,
+            rank:         req.body.rank || 0,
+            dormlyScore:  req.body.dormlyScore || 8,
+            priceUnit:    req.body.priceUnit || 'month',
+            availableFrom: req.body.availableFrom || '',
+            rating: req.body.rating || 0,
+            amenities,
+            amenityLabels,
+            nearbyAmenities,
+            images,
+            image,
+            landlord: {
+                user: user._id,
+                verified: false,
+                responseTime: req.body.responseTime || "",
+            },
+        });
+
+        return res.status(201).json({ success: true, property });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
     }
 };

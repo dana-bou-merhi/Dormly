@@ -81,20 +81,20 @@ export default function PropertyCostSidebar({ price, baseRent, utilities, availa
         )}
 
         <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
-          <img
-            src={landlord.avatar}
-            alt={landlord.name}
+          <img 
+            src={landlord?.user?.profilePicture ||'/images/user.jpeg'}
+            alt={landlord?.user?.username || 'Unknown'}
             className="w-10 h-10 rounded-full object-cover border border-gray-200"
           />
           <div className="flex-1">
             <div className="flex items-center gap-1">
-              <span className="font-bold text-sm text-gray-900">{landlord.name}</span>
-              {landlord.verified && <Star size={12} className="fill-teal-600 text-teal-600" />}
+              <span className="font-bold text-sm text-gray-900">{landlord?.user?.username || 'Unknown'}</span>
+              {landlord?.verified && <Star size={12} className="fill-teal-600 text-teal-600" />}
             </div>
             <p className="text-[10px] text-gray-400">Verified Landlord</p>
           </div>
           <div className="text-[10px] text-gray-400 flex items-center gap-1">
-            <Phone size={12} /> Response time {landlord.responseTime}
+            <Phone size={12} /> Response time {landlord?.responseTime || '<2hrs'}
           </div>
         </div>
       </div>

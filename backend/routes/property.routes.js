@@ -6,8 +6,10 @@ import {
     updateProperty,
     deleteProperty,
     getPropertyStats,
+    createPropertyWithId,
 } from '../controllers/propertyController.js';
 import { isAuthenticated, isAdmin } from '../middleware/auth.middleware.js';
+import { uploadPropertyImages } from '../middleware/propertyImages.js';
 
 const router = express.Router();
 
@@ -20,5 +22,7 @@ router.post('/', isAuthenticated, isAdmin, createProperty);
 router.put('/:id', isAuthenticated, isAdmin, updateProperty);
 router.delete('/:id', isAuthenticated, isAdmin, deleteProperty);
 router.get('/admin/stats', isAuthenticated, isAdmin, getPropertyStats);
+
+router.post('/addproperty', isAuthenticated,uploadPropertyImages.array("images"),createPropertyWithId)
 
 export default router;
