@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux';
 const API = import.meta.env.VITE_API_URL;
 
 const AMENITY_OPTIONS = [
-    'WiFi', 'AC', '24/7 Elec', 'Cleaning', 'Laundry Room',
+    'WiFi', 'AC Units', '24/7 Elec', 'Cleaning', 'Laundry Room',
     'Security Cameras', 'Elevator', 'Rooftop Access', 'Parking',
     'Gym Access', 'Laundry Service', 'Secure Building Access',
     'Meal Plan Options', 'University Shuttle', 'Study Room Access',
@@ -170,7 +170,8 @@ export default function NewAddProperty() {
 
             if (data.success) {
                 toast.success(isEditing ? 'Property updated!' : 'Property published!');
-                navigate('/');
+               // navigate('/');
+               navigate(getRolePath(user?.role))
             } else toast.error(data.message || 'Failed to save property.');
 
         } catch (err) {
@@ -184,6 +185,13 @@ export default function NewAddProperty() {
 
     const isReady = formData.title && formData.price && formData.location;
 
+    const getRolePath = (role) => {
+    if (role === "admin") return "/admin";
+    if (role === "landlord") return "/landlord/listing";
+    // fallback
+    return "/";
+    };
+
     return (
         <div className="min-h-screen bg-slate-50">
             {/* Header */}
@@ -196,7 +204,7 @@ export default function NewAddProperty() {
                             </div>
                             <span className="text-xl font-bold tracking-tight text-teal-600">Dormly Add Property</span>
                         </div>
-                        <button onClick={() => navigate('/')} className="text-slate-500 hover:text-teal-600 transition-colors flex items-center gap-1 text-sm">
+                        <button onClick={() => navigate(getRolePath(user?.role))} className="text-slate-500 hover:text-teal-600 transition-colors flex items-center gap-1 text-sm">
                             Back to Dashboard <ChevronRight size={16} />
                         </button>
                     </div>
@@ -206,7 +214,7 @@ export default function NewAddProperty() {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Breadcrumb */}
                 <nav className="flex items-center gap-2 text-sm text-slate-500 mb-6">
-                    <button onClick={() => navigate('/')} className="hover:text-teal-600">{user?.role}</button>
+                    <button onClick={() => navigate(getRolePath(user?.role))} className="hover:text-teal-600">{user?.role}</button>
                     <ChevronRight size={14} />
                     <span className="text-teal-600 font-medium">{isEditing ? 'Edit Property' : 'Add New Property'}</span>
                 </nav>
@@ -218,7 +226,7 @@ export default function NewAddProperty() {
                         <p className="text-slate-500 mt-1">Fill in the details below to {isEditing ? 'update' : 'list'} a student residence.</p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <Button onClick={() => navigate('/')} variant="outline" className="border-teal-600 text-teal-600 hover:bg-teal-50">
+                        <Button onClick={() => navigate(getRolePath(user?.role))} variant="outline" className="border-teal-600 text-teal-600 hover:bg-teal-50">
                             Cancel
                         </Button>
                         <Button onClick={handleSubmit} disabled={submitting} className="bg-teal-600 hover:bg-teal-700 text-white gap-2">

@@ -13,7 +13,8 @@ import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { selectUser, selectIsAdmin, clearUser } from '../redux/authSlice';
 import { setUser } from '../redux/authSlice';
-
+import axios from 'axios';
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
 const API = import.meta.env.VITE_API_URL;
 
 // ─── Reusable stat card ───────────────────────────────────────────────────────
@@ -48,7 +49,6 @@ function StatusBadge({ status }) {
     );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
 export default function AdminDashboard() {
     const user     = useSelector(selectUser);
     const isAdmin  = useSelector(selectIsAdmin);
@@ -61,6 +61,7 @@ export default function AdminDashboard() {
     const [users, setUsers]                 = useState([]);
     const [loading, setLoading]             = useState(false);
     const [deletingId, setDeletingId]       = useState(null);
+    const [alertOpen, setAlertOpen] = useState(false);
 
     // Listings pagination + search
     const [listPage, setListPage]           = useState(1);
@@ -77,7 +78,7 @@ export default function AdminDashboard() {
     const [userSearch, setUserSearch]       = useState('');
     const [userRole, setUserRole]           = useState('');
 
-    // ── Guard: redirect non-admins ────────────────────────────────────────────
+    // ── Guard: redirect non-admins
     useEffect(() => {
         if (user !== undefined && !isAdmin) {
             toast.error('Admin access required.');
@@ -85,7 +86,7 @@ export default function AdminDashboard() {
         }
     }, [user, isAdmin, navigate]);
 
-    // ── Fetch dashboard stats ─────────────────────────────────────────────────
+    // ── Fetch dashboard stats 
     const fetchStats = useCallback(async () => {
         try {
             const res = await fetch(`${API}/api/admin/stats`, { credentials: 'include' });
@@ -150,8 +151,13 @@ export default function AdminDashboard() {
         if (currentPage === 'users') fetchUsers();
     }, [currentPage, fetchUsers]);
 
-    // ── Delete property ───────────────────────────────────────────────────────
-    const handleDeleteProperty = async (id) => {
+    const confirmDeleteProperty = (id) => {
+  setDeletingId(id);  // store the property id
+  setAlertOpen(true); // open the dialog
+    };
+
+    // ── Delete property 
+    /*const handleDeleteProperty = async (id) => {
         if (!window.confirm('Delete this property? This cannot be undone.')) return;
         setDeletingId(id);
         try {
@@ -172,8 +178,31 @@ export default function AdminDashboard() {
         } finally {
             setDeletingId(null);
         }
-    };
+    };*/
 
+    const handleDeleteProperty = async () => {
+        if (!deletingId) return;
+
+        try {
+            const res = await axios.delete(`${API}/api/properties/${deletingId}`, {
+            withCredentials: true,
+            });
+
+            if (res.data.success) {
+            toast.success('Property deleted.');
+            fetchProperties();
+            fetchStats();
+            } else {
+            toast.error(res.data.message || 'Delete failed.');
+            }
+        } catch (err) {
+            toast.error('Server error.');
+            console.error(err);
+        } finally {
+            setAlertOpen(false);
+            setDeletingId(null);
+        }
+    };
     // ── Delete user ───────────────────────────────────────────────────────────
     const handleDeleteUser = async (id) => {
         if (!window.confirm('Delete this user? This cannot be undone.')) return;
@@ -280,7 +309,7 @@ export default function AdminDashboard() {
                                 </Button>
                                 <Button className="bg-teal-600 hover:bg-teal-700 text-white gap-2">
                                     <Plus size={18} />
-                                    <Link to="/admin/add-property" className="text-white font-semibold">
+                                    <Link to="/new-prop" className="text-white font-semibold">
                                         Add Property
                                     </Link>
                                 </Button>
@@ -381,7 +410,7 @@ export default function AdminDashboard() {
                             </div>
                             <Button className="bg-teal-600 hover:bg-teal-700 text-white gap-2">
                                 <Plus size={18} />
-                                <Link to="/admin/add-property" className="text-white font-semibold">Add Property</Link>
+                                <Link to="/new-prop" className="text-white font-semibold">Add Property</Link>
                             </Button>
                         </div>
 
@@ -472,7 +501,7 @@ export default function AdminDashboard() {
                                                                     <Edit2 size={16} />
                                                                 </Link>
                                                                 <button
-                                                                    onClick={() => handleDeleteProperty(p._id)}
+                                                                    onClick={() => confirmDeleteProperty(p._id)}
                                                                     disabled={deletingId === p._id}
                                                                     className="p-2 text-rose-500 hover:bg-rose-50 rounded-full transition-colors disabled:opacity-40"
                                                                     title="Delete"
@@ -684,6 +713,26 @@ export default function AdminDashboard() {
             <main className="flex-1 lg:ml-64 min-h-screen">
                 <div className="p-4 lg:p-8">{renderContent()}</div>
             </main>
+
+            <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Property</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Are you sure you want to delete this property? This action cannot be undone.
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                        onClick={handleDeleteProperty}
+                        className="bg-red-500 hover:bg-red-600 text-white"
+                    >
+                        Delete
+                    </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

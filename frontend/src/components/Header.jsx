@@ -119,8 +119,6 @@ export default function Header() {
                       </Link>
                     </DropdownMenuItem>
 
-                    {/*New added for specific roles*/ }
-
                     {user?.role === "admin" && (
                     <DropdownMenuItem asChild>
                       <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
@@ -140,7 +138,7 @@ export default function Header() {
                         </DropdownMenuItem>
 
                         <DropdownMenuItem asChild>
-                          <Link to="/my-properties" className="flex items-center gap-2 cursor-pointer">
+                          <Link to="/landlord/listing" className="flex items-center gap-2 cursor-pointer">
                             <Home size={15} className="text-teal-600" />
                             <span>My Properties</span>
                           </Link>
@@ -149,13 +147,6 @@ export default function Header() {
                     )}
 
                     <DropdownMenuSeparator />
-
-                    {/*<DropdownMenuItem asChild>
-                      <Link to="/logout" className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-600 focus:bg-red-50">
-                        <LogOut size={15} />
-                        <span>Log Out</span>
-                      </Link>
-                    </DropdownMenuItem>*/}
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <DropdownMenuItem  onSelect={(e) => e.preventDefault()} // prevents dropdown from closing before dialog opens

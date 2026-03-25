@@ -59,24 +59,8 @@ export const getPropertyById = async (req, res) => {
     }
 };
 
-// ─── CREATE PROPERTY (Admin) 
-export const createProperty = async (req, res) => {
-    try {
-        const { title, price, location } = req.body;
 
-        if (!title || !price || !location) {
-            return res.status(400).json({ success: false, message: 'Title, price, and location are required.' });
-        }
-
-        const property = await Property.create(req.body);
-        res.status(201).json({ success: true, message: 'Property created successfully.', property });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Failed to create property.' });
-    }
-};
-
-// ─── UPDATE PROPERTY (Admin) ──────────────────────────────────────────────────
+//UPDATE PROPERTY (Admin)
 export const updateProperty = async (req, res) => {
     try {
         const property = await Property.findByIdAndUpdate(
@@ -96,7 +80,7 @@ export const updateProperty = async (req, res) => {
     }
 };
 
-// ─── DELETE PROPERTY (Admin) ──────────────────────────────────────────────────
+
 export const deleteProperty = async (req, res) => {
     try {
         const property = await Property.findByIdAndDelete(req.params.id);
@@ -109,7 +93,7 @@ export const deleteProperty = async (req, res) => {
     }
 };
 
-// ─── ADMIN DASHBOARD STATS ────────────────────────────────────────────────────
+// ADMIN DASHBOARD STATS 
 export const getPropertyStats = async (req, res) => {
     try {
         const [total, available, comingSoon, full] = await Promise.all([
@@ -154,7 +138,7 @@ export const getPropertyStats = async (req, res) => {
 };
 
 
-// lanlord add property 
+// add property with id of user creating it 
 
 export const createPropertyWithId = async (req, res) => {
     try {
@@ -214,4 +198,21 @@ export const createPropertyWithId = async (req, res) => {
         console.error(error);
         return res.status(500).json({ success: false, message: error.message });
     }
+};
+
+
+// get lanlord data 
+export const getLanlordListings = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const properties = await Property.find({
+      "landlord.user": userId
+    }).sort({ createdAt: -1 });
+
+    res.json(properties);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
 };

@@ -15,6 +15,7 @@ import ChatbotButton from './components/ChatbotButton'
 import { Toaster } from './components/ui/sonner'
 import FavoriteDorms from './pages/FavoriteDorms'
 import NewAddProperty from './pages/NewAddProperty';
+import LandlordListingsPage from './pages/LandlordListingPage';
 
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -51,6 +52,7 @@ function App() {
         <Route path="/dormly-ai"               element={<DormlyAi />} />
         <Route path="/favorite"                element={<FavoriteDorms />} />
         <Route path='/new-prop' element={<NewAddProperty/>}/>
+        <Route path='/landlord/listing' element={<LandlordListingsPage/>} />
         
        
       </Routes>

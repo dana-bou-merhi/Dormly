@@ -146,10 +146,11 @@ export default function AddProperty() {
                         <Button onClick={() => navigate('/admin')} variant="outline" className="border-teal-600 text-teal-600 hover:bg-teal-50">
                             Cancel
                         </Button>
-                        <Button onClick={handleSubmit} disabled={submitting} className="bg-teal-600 hover:bg-teal-700 text-white gap-2">
+                      {/*  <Button onClick={handleSubmit} disabled={submitting} className="bg-teal-600 hover:bg-teal-700 text-white gap-2">
                             {submitting && <Loader2 size={16} className="animate-spin" />}
                             {isEditing ? 'Save Changes' : 'Publish Property'}
-                        </Button>
+                        </Button> */} 
+                        
                     </div>
                 </div>
 

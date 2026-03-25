@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge.jsx";
 function AvailBadge({ status, date }) {
   const config = {
     now:  { label: "Available Now",   cls: "bg-emerald-500 text-white",   dot: "bg-emerald-300 animate-ping" },
-    soon: { label: date ?? "Available Soon", cls: "bg-amber-400 text-white",    dot: "bg-amber-200 animate-ping" },
+    soon: { label: date ? `Soon – ${date}` : "Available Soon",cls: "bg-amber-400 text-white", dot: "bg-amber-200 animate-ping" },
+    //soon: { label: date ?? "Available Soon", cls: "bg-amber-400 text-white", dot: "bg-amber-200 animate-ping" },
     full: { label: "Fully Booked",    cls: "bg-red-500 text-white",       dot: null },
   };
   const c = config[status] ?? config.now;
@@ -106,12 +107,26 @@ export default function ListingCard({ listing }) {
   const {_id, title, location, image, rating, reviews, price, priceUnit, amenities = [],
     // NEW data fields
     rank,
-    availability = "now",   // "now" | "soon" | "full"
-    availableDate,           
+    status,   // "now" | "soon" | "full"
+    availableFrom,           
     dormlyScore = 8.0,
     priceTrend,              // "up" | "down"
     priceTrendPct,           // number
   } = listing;
+
+    const normalizeStatus = (status) => {
+  if (!status) return "now";
+
+  const s = status.toLowerCase();
+
+  if (s.includes("now")) return "now";
+  if (s.includes("soon")) return "soon";
+  if (s.includes("full")) return "full";
+
+  return "now";
+};
+
+const normalizedStatus = normalizeStatus(status);
 
   return (
     <article className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col">
@@ -129,7 +144,7 @@ export default function ListingCard({ listing }) {
 
         {/* Top-left: availability */}
         <div className="absolute top-3 left-3 z-10">
-          <AvailBadge status={availability} date={availableDate} />
+          <AvailBadge status={normalizedStatus} date={availableFrom} />
         </div>
 
         {/* Top-right: rank */}
@@ -192,14 +207,14 @@ export default function ListingCard({ listing }) {
 
           <Button
             asChild
-            disabled={availability === "full"}
+            disabled={normalizedStatus === "full"}
             className={`text-sm font-semibold px-3 py-2 rounded-lg transition-all ${
-              availability === "full"
+              normalizedStatus === "full" 
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed hover:bg-gray-200"
                 : "bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/20"
             }`}
           >
-            {availability === "full" ? (
+            {normalizedStatus === "full" ? (
               <span className="flex items-center gap-1"><Users className="w-3 h-3" /> Join Waitlist</span>
             ) : (
               <Link to={`/property/${_id}`}>View Details →</Link>
