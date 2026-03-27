@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
     role: { type: String, enum: ['landlord', 'student', 'admin'], default: 'student' },
     favorites: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Dorms',
+        ref: 'Property', // Changed from 'Dorms' to 'Property' to match property.model.js
         default: []
     }],
     profilePicture: { type: String, default: '/images/user.jpeg' },
@@ -17,18 +17,18 @@ const userSchema = new mongoose.Schema({
     bio:{type: String, default:''}
 }, { timestamps: true });
 
+// AUTO-HASH: Only hash if password is modified
+userSchema.pre('save', async function (next) {
+    if (!this.isModified('password')) return next();
 
-
-// AUTO-HASH: Updated to modern async syntax (removed 'next')
-
-userSchema.pre('save', async function () {
-    if (!this.isModified('password')) return;
-
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-   
+    try {
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
+        next();
+    } catch (error) {
+        next(error);
+    }
 });
-
 
 // LOGIN HELPER
 userSchema.methods.comparePassword = async function (enteredPassword) {
