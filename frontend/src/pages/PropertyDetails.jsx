@@ -60,29 +60,33 @@ export default function PropertyDetails() {
   const [isFavorited, setIsFavorited] = useState(false);
   const [showMessageBox, setShowMessageBox] = useState(false);
   const [message, setMessage] = useState('');
-  const API_URL = import.meta.env.VITE_API_URL 
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  useEffect(()=> {
-    const fetchPropertDetails= async()=>{
-      try {
-        const res = await axios.get(`${API_URL}/api/properties/${id}`)
-         const data = res.data;
+ useEffect(() => {
+  const fetchPropertDetails = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/properties/${id}`);
+      const data = res.data;
 
-         if (data.success) {
-          setProperty(data.property);
-        } else {
-          setError(data.message || 'Property not found');
-        }
+      if (data.success) {
+        setProperty(data.property);
 
-      } catch (error) {
-        setError('Failed to fetch property');
+        console.log("PROPERTY:", data.property);
+        console.log("IMAGES:", data.property.images);
+        console.log("IMAGE:", data.property.image);
+      } else {
+        setError(data.message || "Property not found");
       }
-      finally{
-        setLoading(false);
-      }
+
+    } catch (error) {
+      setError("Failed to fetch property");
+    } finally {
+      setLoading(false);
     }
-    fetchPropertDetails()
-  },[id])
+  };
+
+  fetchPropertDetails();
+}, [id]);
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }).map((_, i) => (
@@ -106,7 +110,17 @@ export default function PropertyDetails() {
       <main className="grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         
         
-       <DormsImagesGallery images={property.images} selectedImage={selectedImage} setSelectedImage={setSelectedImage} />
+       <DormsImagesGallery
+  images={
+    property.images && property.images.length > 0
+      ? property.images
+      : property.image
+      ? [property.image]
+      : []
+  }
+  selectedImage={selectedImage}
+  setSelectedImage={setSelectedImage}
+/>
 
 
         

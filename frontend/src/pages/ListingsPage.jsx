@@ -1,29 +1,33 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Header from '@/components/Header.jsx';
 import Footer from '@/components/Footer.jsx';
-import ChatbotButton from '@/components/ChatbotButton.jsx';
 import ListingCard from '@/components/ListingCards';
 import { Button } from '@/components/ui/button.jsx';
 import { ChevronDown, Loader2 } from 'lucide-react';
-
+ 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-
+ 
 export default function ListingsPage() {
-  const [allListings, setAllListings] = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const [filters, setFilters]         = useState({
-    location: 'All',
-    roomTypes: [],
-    minPrice: '',
-    maxPrice: '',
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [allListings, setAllListings]   = useState([]);
+  const [loading, setLoading]           = useState(true);
+ 
+  // Read initial values from URL (set by HeroSection)
+  const [filters, setFilters] = useState({
+    search:    searchParams.get('search') || '',
+    location:  'All',
+    roomTypes: searchParams.get('type') ? [searchParams.get('type')] : [],
+    minPrice:  '',
+    maxPrice:  '',
     amenities: [],
-    status: '',
+    status:    '',
   });
   const [sortBy, setSortBy] = useState('Recommended');
-
-  
+ 
+  // Fetch all properties from backend
   useEffect(() => {
-    const fetch_ = async () => {
+    const fetchListings = async () => {
       try {
         setLoading(true);
         const res  = await fetch(`${API_URL}/api/properties?limit=100`);
@@ -35,12 +39,22 @@ export default function ListingsPage() {
         setLoading(false);
       }
     };
-    fetch_();
+    fetchListings();
   }, []);
-
-
+ 
+  // Filter
   const filteredListings = useMemo(() => {
     return allListings.filter(l => {
+      // Text search — title, location, description, type
+      if (filters.search) {
+        const q = filters.search.toLowerCase();
+        const matches =
+          l.title?.toLowerCase().includes(q) ||
+          l.location?.toLowerCase().includes(q) ||
+          l.description?.toLowerCase().includes(q) ||
+          l.type?.toLowerCase().includes(q);
+        if (!matches) return false;
+      }
       if (filters.location !== 'All' && !l.location?.toLowerCase().includes(filters.location.toLowerCase())) return false;
       if (filters.roomTypes.length > 0 && !filters.roomTypes.includes(l.type)) return false;
       if (filters.status && l.status !== filters.status) return false;
@@ -54,37 +68,39 @@ export default function ListingsPage() {
       return true;
     });
   }, [allListings, filters]);
-
-
+ 
+  // Sort
   const sortedListings = useMemo(() => {
     const sorted = [...filteredListings];
     switch (sortBy) {
-      case 'Price: Low to High':  return sorted.sort((a, b) => a.price - b.price);
-      case 'Price: High to Low':  return sorted.sort((a, b) => b.price - a.price);
-      case 'Highest Rated':       return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-      case 'Dormly Score':        return sorted.sort((a, b) => (b.dormlyScore || 0) - (a.dormlyScore || 0));
-      default:                    return sorted.sort((a, b) => (a.rank || 999) - (b.rank || 999));
+      case 'Price: Low to High': return sorted.sort((a, b) => a.price - b.price);
+      case 'Price: High to Low': return sorted.sort((a, b) => b.price - a.price);
+      case 'Highest Rated':      return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      case 'Dormly Score':       return sorted.sort((a, b) => (b.dormlyScore || 0) - (a.dormlyScore || 0));
+      default:                   return sorted.sort((a, b) => (a.rank || 999) - (b.rank || 999));
     }
   }, [filteredListings, sortBy]);
-
-  const handleResetFilters = () => setFilters({ location: 'All', roomTypes: [], minPrice: '', maxPrice: '', amenities: [], status: '' });
-
+ 
+  const handleResetFilters = () => {
+    setFilters({ search: '', location: 'All', roomTypes: [], minPrice: '', maxPrice: '', amenities: [], status: '' });
+    setSearchParams({});
+  };
+ 
   const toggleArr = (key, val) =>
     setFilters(prev => ({
       ...prev,
       [key]: prev[key].includes(val) ? prev[key].filter(x => x !== val) : [...prev[key], val],
     }));
-
-  // Derive unique locations from data
+ 
   const locations = ['All', ...new Set(allListings.map(l => l.location?.split(',')[0]).filter(Boolean))];
-
+ 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
       <Header />
-
+ 
       <main className="max-w-7xl mx-auto px-4 lg:px-10 py-8 flex flex-col lg:flex-row gap-8 grow w-full">
-
-        {/* ── Sidebar Filters ── */}
+ 
+        {/* Sidebar */}
         <aside className="w-full lg:w-72 shrink-0">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-7 sticky top-8">
             <div className="flex items-center justify-between border-b border-slate-50 pb-4">
@@ -93,25 +109,37 @@ export default function ListingsPage() {
                 Reset All
               </button>
             </div>
-
+ 
+            {/* Text search */}
+            <section>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Search</label>
+              <input
+                type="text"
+                placeholder="Title, location, type…"
+                value={filters.search}
+                onChange={e => setFilters(p => ({ ...p, search: e.target.value }))}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm p-2.5 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+              />
+            </section>
+ 
             {/* Location */}
             <section>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Location</label>
               <select
                 value={filters.location}
-                onChange={e => setFilters(prev => ({ ...prev, location: e.target.value }))}
+                onChange={e => setFilters(p => ({ ...p, location: e.target.value }))}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm p-2.5 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
               >
                 {locations.map(l => <option key={l}>{l}</option>)}
               </select>
             </section>
-
+ 
             {/* Status */}
             <section>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Availability</label>
               <select
                 value={filters.status}
-                onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))}
+                onChange={e => setFilters(p => ({ ...p, status: e.target.value }))}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm p-2.5 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
               >
                 <option value="">All</option>
@@ -120,42 +148,38 @@ export default function ListingsPage() {
                 <option value="Full">Full</option>
               </select>
             </section>
-
+ 
             {/* Room Type */}
             <section>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Room Type</label>
               <div className="space-y-2.5">
                 {['Single Studio', 'Single Room', 'Double Shared Room', 'Apartment', 'Luxury Apartment', 'Modern Studio'].map(type => (
                   <label key={type} className="flex items-center gap-3 cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={filters.roomTypes.includes(type)}
-                      onChange={() => toggleArr('roomTypes', type)}
-                      className="w-4 h-4 rounded text-teal-600 border-slate-300 focus:ring-teal-500/20"
-                    />
+                    <input type="checkbox" checked={filters.roomTypes.includes(type)} onChange={() => toggleArr('roomTypes', type)}
+                      className="w-4 h-4 rounded text-teal-600 border-slate-300 focus:ring-teal-500/20" />
                     <span className="text-sm text-slate-600 group-hover:text-teal-600 transition-colors">{type}</span>
                   </label>
                 ))}
               </div>
             </section>
-
-            {/* Price Range */}
+ 
+            {/* Price */}
             <section>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Price Range (USD)</label>
               <div className="flex items-center gap-2">
                 <div className="relative w-full">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
                   <input type="number" placeholder="Min" value={filters.minPrice} onChange={e => setFilters(p => ({ ...p, minPrice: e.target.value }))}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm py-2 pl-6 pr-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent" />
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm py-2 pl-6 pr-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none" />
                 </div>
                 <div className="relative w-full">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
                   <input type="number" placeholder="Max" value={filters.maxPrice} onChange={e => setFilters(p => ({ ...p, maxPrice: e.target.value }))}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm py-2 pl-6 pr-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent" />
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm py-2 pl-6 pr-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none" />
                 </div>
               </div>
             </section>
-
+ 
             {/* Amenities */}
             <section>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Amenities</label>
@@ -171,14 +195,17 @@ export default function ListingsPage() {
             </section>
           </div>
         </aside>
-
-        {/* ── Listings ── */}
+ 
+        {/* Listings */}
         <section className="flex-1">
           <header className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4 border-b border-slate-100 pb-3">
             <div>
               <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Verified Dorms</h1>
               <p className="text-teal-600 text-sm mt-1 font-medium">
-                {loading ? 'Loading...' : `Showing ${sortedListings.length} properties`}
+                {loading ? 'Loading…' : `Showing ${sortedListings.length} properties`}
+                {filters.search && !loading && (
+                  <span className="ml-2 text-slate-500">for "<strong>{filters.search}</strong>"</span>
+                )}
               </p>
             </div>
             <div className="flex items-center gap-2 self-start sm:self-auto">
@@ -196,7 +223,7 @@ export default function ListingsPage() {
               </div>
             </div>
           </header>
-
+ 
           {loading ? (
             <div className="flex flex-col items-center justify-center py-24 gap-4">
               <Loader2 size={36} className="animate-spin text-teal-600" />
@@ -211,7 +238,7 @@ export default function ListingsPage() {
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <h3 className="text-xl font-bold text-slate-900 mb-2">No listings found</h3>
-              <p className="text-slate-500 mb-6">Try adjusting your filters or check back later.</p>
+              <p className="text-slate-500 mb-6">Try adjusting your search or filters.</p>
               <Button onClick={handleResetFilters} className="bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-6 rounded-lg">
                 Reset Filters
               </Button>
@@ -219,7 +246,6 @@ export default function ListingsPage() {
           )}
         </section>
       </main>
-
       <Footer />
     </div>
   );
