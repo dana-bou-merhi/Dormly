@@ -160,7 +160,7 @@ export default function ListingsPage() {
             <section>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Amenities</label>
               <div className="space-y-2.5">
-                {['Free Wi-Fi', 'AC Units', 'Generator 24/7', 'Security Cameras', 'Laundry Room', 'Elevator'].map(a => (
+                {['WiFi', 'AC Units', '24/7 Elec', 'Security Cameras', 'Laundry Room', 'Elevator'].map(a => (
                   <label key={a} className="flex items-center gap-3 cursor-pointer group">
                     <input type="checkbox" checked={filters.amenities.includes(a)} onChange={() => toggleArr('amenities', a)}
                       className="w-4 h-4 rounded text-teal-600 border-slate-300 focus:ring-teal-500/20" />

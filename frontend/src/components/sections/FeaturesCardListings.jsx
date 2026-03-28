@@ -5,118 +5,8 @@ import ListingCard from "../ListingCards";
 import { Link } from "react-router-dom";
 import InsightCard from "../InsightCard";
 import axios from "axios";
-/*const listings = [
-  {
-    id: 1,
-    title: "Single Apartment LAU",
-    location: "500m to LAU, Hamra District",
-    image: "/images/Dorm4.jpg",
-    rating: 5,
-    reviews: 12,
-    price: 250,
-    priceUnit: "month",
-    amenities: ["24/7 Elec", "WiFi", "Guarded"],
-    rank: 1,
-    availability: "now",
-    dormlyScore: 9.4,
-    powerScore: 8.4,
-    powerHours: 12,
-    priceTrend: "down",
-    priceTrendPct: 5,
-  },
-  {
-    id: 2,
-    title: "Single Apartment AUB",
-    location: "200m to AUB, Bliss Street",
-    image: "/images/dorm2.jpg",
-    rating: 4,
-    reviews: 8,
-    price: 300,
-    priceUnit: "month",
-    amenities: ["24/7 Elec", "Furnished"],
-    rank: 2,
-    availability: "soon",
-    availableDate: "Aug 1",
-    dormlyScore: 8.9,
-    powerScore: 8.4,
-    powerHours: 18,
-    priceTrend: "up",
-    priceTrendPct: 3,
-  },
-  {
-    id: 3,
-    title: "Double Shared Room",
-    location: "1km to LAU, Qoreitem",
-    image: "/images/dorm3.jpg",
-    rating: 5,
-    reviews: 24,
-    price: 180,
-    priceUnit: "bed",
-    amenities: ["24/7 Elec", "WiFi"],
-    rank: 3,
-    availability: "full",
-    dormlyScore: 9.1,
-    powerScore: 9.6,
-    powerHours: 22,
-    priceTrend: "down",
-    priceTrendPct: 2,
-  },
-  {
-    id: 4,
-    title: "Luxury Apartment Downtown",
-    location: "100m to Downtown, Beirut",
-    image: "/images/dorm1.avif",
-    rating: 5,
-    reviews: 25,
-    price: 450,
-    priceUnit: "month",
-    amenities: ["24/7 Elec", "WiFi", "Furnished"],
-    rank: 4,
-    availability: "now",
-    dormlyScore: 8.7,
-    powerScore: 8.8,
-    powerHours: 20,
-    priceTrend: "up",
-    priceTrendPct: 1,
-  },
-  {
-    id: 5,
-    title: "Single Room Near Verdun",
-    location: "400m to Verdun, Beirut",
-    image: "/images/dorm6.jpg",
-    rating: 4,
-    reviews: 10,
-    price: 160,
-    priceUnit: "month",
-    amenities: ["WiFi"],
-    rank: 5,
-    availability: "now",
-    dormlyScore: 8.2,
-    powerScore: 7.2,
-    powerHours: 16,
-    priceTrend: "down",
-    priceTrendPct: 8,
-  },
-  {
-    id: 6,
-    title: "Modern Studio Saida",
-    location: "250m to LIU, Saida",
-    image: "/images/dorm5.jpg",
-    rating: 5,
-    reviews: 18,
-    price: 280,
-    priceUnit: "month",
-    amenities: ["24/7 Elec", "WiFi", "Furnished"],
-    rank: 6,
-    availability: "soon",
-    availableDate: "Sep 1",
-    dormlyScore: 8.7,
-    powerScore: 8.8,
-    powerHours: 20,
-    priceTrend: "up",
-    priceTrendPct: 2,
-  },
-];*/
+
+
 
 const SORT_OPTIONS = [
   { key: "ranking",   label: "Top Ranked",   Icon: Trophy      },
@@ -139,7 +29,7 @@ function sortListings(list, key) {
     case "score": 
       return clone.sort((a, b) => (b.dormlyScore || 0) - (a.dormlyScore || 0) || (b.rating || 0) - (a.rating || 0));
     case "available": 
-      return clone.filter(a => a.availability === "now");
+      return clone.filter(a => a.status === "Available Now");
     default: 
       return clone;
   }
@@ -172,7 +62,7 @@ export default function FeaturesCardListings() {
 
   const sorted = sortListings(listings || [], sortKey);
   
-  const availableNow = listings.filter(l => l.availability === "now").length;
+  const availableNow = listings.filter(l => l.status === "Available Now").length;
   
   const avgScore = listings.length > 0 
     ? (listings.reduce((s, l) => s + (l.dormlyScore || 0), 0) / listings.length).toFixed(1) 
