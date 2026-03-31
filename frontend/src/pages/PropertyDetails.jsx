@@ -71,9 +71,9 @@ export default function PropertyDetails() {
       if (data.success) {
         setProperty(data.property);
 
-        console.log("PROPERTY:", data.property);
-        console.log("IMAGES:", data.property.images);
-        console.log("IMAGE:", data.property.image);
+        //console.log("PROPERTY:", data.property);
+       // console.log("IMAGES:", data.property.images);
+        //console.log("IMAGE:", data.property.image);
       } else {
         setError(data.message || "Property not found");
       }
@@ -223,7 +223,7 @@ export default function PropertyDetails() {
          
           
           <PropertyCostSidebar price={property.price} baseRent={property.baseRent} utilities={property.utilities} 
-          availableFrom={property.availableFrom} landlord={property.landlord} />
+          availableFrom={property.availableFrom} landlord={property.landlord} propertyId={property._id} />
         </div>
       </main>
 

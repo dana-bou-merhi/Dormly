@@ -61,6 +61,7 @@ export const getPropertyById = async (req, res) => {
 
 
 //UPDATE PROPERTY (Admin)
+/*
 export const updateProperty = async (req, res) => {
     try {
         const property = await Property.findByIdAndUpdate(
@@ -78,6 +79,75 @@ export const updateProperty = async (req, res) => {
         console.error(error);
         res.status(500).json({ success: false, message: 'Failed to update property.' });
     }
+};
+*/
+
+export const updateProperty = async (req, res) => {
+  try {
+    const property = await Property.findById(req.params.id);
+    if (!property) {
+      return res.status(404).json({ success: false, message: 'Property not found.' });
+    }
+
+    // Parse fields (same as create)
+    const amenityLabels = req.body.amenityLabels  ? JSON.parse(req.body.amenityLabels) : [];
+
+    const nearbyAmenities = req.body.nearbyAmenities ? JSON.parse(req.body.nearbyAmenities) : [];
+
+    const amenities = amenityLabels.slice(0, 3);
+
+    // Handle images (same logic as create)
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+    const newImages = req.files?.map(  file => `${baseUrl}/uploads/properties/${file.filename}` ) || [];
+
+    // Keep old images if no new ones uploaded
+   // const images = newImages.length > 0 ? newImages : property.images;
+   
+   const images = [...property.images, ...newImages];
+
+    const image = images[0] || property.image;
+
+    // Update fields
+    property.title = req.body.title;
+    property.description = req.body.description;
+    property.type = req.body.type;
+    property.status = req.body.status;
+    property.furnishing = req.body.furnishing;
+    property.location = req.body.location;
+    property.distance = req.body.distance;
+    property.price = req.body.price;
+    property.baseRent = req.body.baseRent;
+    property.utilities = req.body.utilities;
+    property.package = req.body.packageType;
+    property.reviews = req.body.reviews || 0;
+    property.rank = req.body.rank || 0;
+    property.dormlyScore = req.body.dormlyScore || 8;
+    property.priceUnit = req.body.priceUnit || 'month';
+    property.availableFrom = req.body.availableFrom || '';
+    property.rating = req.body.rating || 0;
+
+    property.amenities = amenities;
+    property.amenityLabels = amenityLabels;
+    property.nearbyAmenities = nearbyAmenities;
+
+    property.images = images;
+    property.image = image;
+
+    property.landlord.responseTime = req.body.responseTime || "";
+
+    await property.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Property updated successfully",
+      property
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 

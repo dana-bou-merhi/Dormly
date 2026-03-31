@@ -10,12 +10,45 @@ export default function ChatbotButton() {
     },
   ]);
   const [inputValue, setInputValue] = useState('');
+   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
+
+   /*  if (!inputValue.trim()) return;
+
+  const userMessage = inputValue;
+
+  // Add user message immediately
+  setMessages((prev) => [...prev, { type: 'user', text: userMessage }]);
+  setInputValue('');
+
+  try {
+    const response = await fetch(`${API_URL}/api/aichat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message: userMessage }),
+    });
+
+    const data = await response.json();
+
+    // Add AI response
+    setMessages((prev) => [
+      ...prev,
+      { type: 'bot', text: data.message },
+    ]);
+
+  } catch (error) {
+    setMessages((prev) => [
+      ...prev,
+      { type: 'bot', text: 'Error connecting to AI. Please try again.' },
+    ]);
+  }*/
     if (inputValue.trim()) {
       setMessages([...messages, { type: 'user', text: inputValue }]);
       setInputValue('');

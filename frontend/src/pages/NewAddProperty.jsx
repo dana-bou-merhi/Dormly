@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ChevronRight, Plus, Trash2, MapPin, Zap, AlertCircle, Lightbulb, Home, GraduationCap, Loader2, ImagePlus, X, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button.jsx';
 import { Card } from '@/components/ui/card.jsx';
@@ -82,6 +82,55 @@ export default function NewAddProperty() {
         nearbyAmenities: [{ name: '', distance: '' }],
     });
 
+
+    useEffect(() => {
+  if (!isEditing) return;
+
+  const fetchProperty = async () => {
+    try {
+      const res = await axios.get(`${API}/api/properties/${id}`);
+      const property = res.data.property;
+
+      setFormData({
+        title: property.title || '',
+        description: property.description || '',
+        type: property.type || '',
+        status: property.status || 'Available Now',
+        furnishing: property.furnishing || '',
+        location: property.location || '',
+        distance: property.distance || '',
+        price: property.price || '',
+        baseRent: property.baseRent || '',
+        utilities: property.utilities || '',
+        packageType: property.package || '',
+        amenities: property.amenities || [],
+        amenityLabels: property.amenityLabels || [],
+        reviews: property.reviews || 0,
+        availableFrom: property.availableFrom || '',
+        rank: property.rank || 0,
+        rating: property.rating || 0,
+        dormlyScore: property.dormlyScore || 8,
+        priceUnit: property.priceUnit || 'month',
+        responseTime: property.landlord.responseTime || '',
+        nearbyAmenities: property.nearbyAmenities?.length
+          ? property.nearbyAmenities
+          : [{ name: '', distance: '' }],
+      });
+
+            // Optional: existing images (if stored as URLs)
+            if (property.images) {
+                setImagePreviews(property.images);
+            }
+
+            } catch (err) {
+            console.error(err);
+            toast.error("Failed to load property");
+            }
+        };
+
+        fetchProperty();
+        }, [id, isEditing]);
+
      const handle = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -134,9 +183,11 @@ export default function NewAddProperty() {
 
         setSubmitting(true);
         try {
-            //const method = isEditing ? 'PUT' : 'POST';
-            //  const url = isEditing ? ${API}/api/properties/${id} : ${API}/api/properties;
-            const body = new FormData();
+            const method = isEditing ? 'put' : 'post';
+              const url = isEditing ? `${API}/api/properties/updateproperty/${id}` : `${API}/api/properties/addproperty`;
+            
+
+        const body = new FormData();
 
             imageFiles.forEach(file => body.append('images', file));
 
@@ -164,7 +215,8 @@ export default function NewAddProperty() {
                 formData.nearbyAmenities.filter(n => n.name.trim())
             ));
 
-            const res = await axios.post(`${API}/api/properties/addproperty`, body, {withCredentials: true})
+            //const res = await axios.post(`${API}/api/properties/addproperty`, body, {withCredentials: true})
+            const res =await axios({method,url,data:body,withCredentials: true})
     
             const data = res.data;
 
@@ -556,10 +608,11 @@ export default function NewAddProperty() {
                                     <label className="block text-sm font-medium text-slate-700 mb-3">Amenities</label>
                                     <div className="space-y-2.5">
                                         {AMENITY_OPTIONS.map(a => (
+                                            
                                             <label key={a} className="flex items-center gap-3 cursor-pointer group">
                                                 <input
                                                     type="checkbox"
-                                                    checked={formData.amenities.includes(a)}
+                                                    checked={formData.amenityLabels.includes(a)}
                                                     onChange={() => toggleAmenity(a)}
                                                     className="w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500 cursor-pointer"
                                                 />

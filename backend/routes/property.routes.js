@@ -17,7 +17,8 @@ router.get('/', getProperties);
 router.get('/:id', getPropertyById);
 
 // Admin-only routes
-router.put('/:id', isAuthenticated, isAdmin, updateProperty);
+router.put('/updateproperty/:id', isAuthenticated,uploadPropertyImages.array('images'), updateProperty);
+
 router.delete('/:id', isAuthenticated, deleteProperty);
 router.get('/admin/stats', isAuthenticated, isAdmin, getPropertyStats);
 

@@ -100,65 +100,76 @@ function formatDate(dateStr) {
 
  
 function InquiryCard({ inquiry }) {
-  const s = INQUIRY_STATUS[inquiry.status] ?? INQUIRY_STATUS.pending;
+  // Format date from backend
+    const s = INQUIRY_STATUS[inquiry.status] || INQUIRY_STATUS.pending;
   const StatusIcon = s.icon;
 
-  return (
-    <article className="group flex gap-4 p-5 hover:bg-slate-50/60 transition-colors border-b border-slate-100 last:border-0">
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    return new Date(dateStr).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
+  return (
+   <article className="group flex gap-4 p-5 hover:bg-slate-50/60 transition-colors border-b border-slate-100 last:border-0">
       {/* Property image */}
       <div className="w-20 h-16 rounded-xl overflow-hidden shrink-0">
         <img
-          src={inquiry.propertyImage}
-          alt={inquiry.propertyTitle}
+          src={inquiry.property?.image || '/images/dorm2.jpg'}
+          alt={inquiry.property?.title || "Property"}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
       </div>
 
-      {/* Content */}
+    
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2 mb-0.5">
-          {/* Title + location */}
+        
           <div className="min-w-0">
-            <h4 className="font-bold text-slate-900 text-sm truncate">{inquiry.propertyTitle}</h4>
+            <h4 className="font-bold text-slate-900 text-sm truncate">
+              {inquiry.property?.title || "Unknown Property"}
+            </h4>
             <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
               <Home size={10} className="text-teal-500 shrink-0" />
-              {inquiry.propertyLocation}
+              {inquiry.property?.location || "Unknown Location"}
               <span className="text-slate-300 mx-1">·</span>
-              <span className="text-teal-600 font-semibold">${inquiry.price}/mo</span>
+             <span className="text-teal-600 font-semibold">
+              {inquiry.isMine
+                ? `To: ${inquiry.user.username}`
+                : `From: ${inquiry.user.username}`}
+            </span>
             </p>
           </div>
 
-          {/* Status badge */}
+        
           <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full border shrink-0 ${s.cls}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
             {s.label}
           </span>
         </div>
 
-        {/* Message snippet */}
+       
         <p className="text-xs text-slate-500 mt-1.5 line-clamp-1 italic">
-          "{inquiry.lastMessage}"
+          "{inquiry.lastMessage || inquiry.content}"
         </p>
 
-        {/* Footer: date + actions */}
+       
         <div className="flex items-center justify-between mt-2.5 flex-wrap gap-2">
           <span className="text-[11px] text-slate-400 flex items-center gap-1">
             <Clock size={10} /> Sent {formatDate(inquiry.sentAt)}
           </span>
 
           <div className="flex items-center gap-2">
-            <Link to={`/property/${inquiry.propertyId}`}>
-              <button className="text-[11px] font-semibold text-slate-600 hover:text-teal-600 transition-colors">
+            <Link to={`/property/${inquiry.property?._id}`}>
+              <button className="text-[11px] font-semibold text-teal-600 hover:text-teal-700 flex items-center gap-1 transition-colors">
                 View Property
               </button>
             </Link>
             <span className="text-slate-200">·</span>
-            <Link to={`/messages/${inquiry.id}`}>
-              <button className="text-[11px] font-semibold text-teal-600 hover:text-teal-700 flex items-center gap-1 transition-colors">
-                <MessageCircle size={11} /> View Conversation
-              </button>
-            </Link>
+           
           </div>
         </div>
       </div>
@@ -168,24 +179,13 @@ function InquiryCard({ inquiry }) {
 
 export default function UserProfile() {
   const [isEditing, setIsEditing] = useState(false);
-  const [inquiries] = useState(MOCK_INQUIRIES);
+  //const [inquiries] = useState(MOCK_INQUIRIES);
+  const [inquiries, setInquiries] = useState([]);
   const {user} = useSelector(store =>store.auth);
   const dispatch = useDispatch();
    const API_URL = import.meta.env.VITE_API_URL;
 
- 
-  /*const [profile, setProfile] = useState({
-    username:    user?.username,
-    email:       user?.email,
-    phone:       user?.phone ||'+961...',
-    university:  user?.university || 'Lebanese University (UL)',
-    bio:         user?.bio || '',
-    role:        user?.role,
-    profilePicture:     user?.profilePicture|| '/images/user.jpeg',
-  });
 
-  // Draft state — only committed on Save
-  const [draft, setDraft] = useState({ ...profile });*/
   const [profile, setProfile] = useState({
   username: "",
   email: "",
@@ -261,15 +261,6 @@ useEffect(() => {
 
   };
 
-
- /* const handleAvatarChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const objectUrl = URL.createObjectURL(file);
-    setDraft((prev) => ({ ...prev, profilePicture: objectUrl }));
-    // Also update profile.avatar preview immediately so the sidebar reflects it
-    setProfile((prev) => ({ ...prev, profilePicture: objectUrl }));
-  };*/
 // new to match bckend
   const handleAvatarChange = (e) => {
   const file = e.target.files?.[0];
@@ -287,6 +278,25 @@ useEffect(() => {
 
   const pendingCount = inquiries.filter((i) => i.status === 'pending').length;
   const repliedCount = inquiries.filter((i) => i.status === 'replied').length;
+  useEffect(() => {
+  //if (!user) return;
+
+  const fetchInquiries = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/messages`, {
+        withCredentials: true,  // JWT cookie/session
+      });
+     
+      setInquiries(res.data.conversations);
+    } catch (err) {
+      console.error("Failed to fetch inquiries:", err);
+      toast.error("Failed to load inquiries");
+    }
+  };
+
+  fetchInquiries();
+  }, [user]);
+  
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">

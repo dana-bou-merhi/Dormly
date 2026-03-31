@@ -1,15 +1,53 @@
 import { useState } from 'react';
 import { Calendar, MessageCircle, Send, Phone, Star, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button.jsx';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
-export default function PropertyCostSidebar({ price, baseRent, utilities, availableFrom, landlord }) {
+
+export default function PropertyCostSidebar({ price, baseRent, utilities, availableFrom, landlord, propertyId }) {
   const [showMessageBox, setShowMessageBox] = useState(false);
   const [message, setMessage] = useState('');
+  const {user} = useSelector(store =>store.auth);
+  //const canContact = user && user._id !== landlord?.user?._id;
+  const isLoggedIn = !!user;
+const isOwner = user?._id === landlord?.user?._id;
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  const navigate = useNavigate();
+
+  const handleSendMessage = async () => {
+  if (!message.trim()) return;
+
+  try {
+    const res = await axios.post(`${API_URL}/api/messages/send/message`,  {  propertyId, landlordId: landlord.user._id, content: message, },
+      {
+        withCredentials: true, 
+      }
+    );
+    const data = res.data;
+
+    setMessage('');
+    setShowMessageBox(false);
+    
+    if (data.success) {
+    toast.success(data.message || 'Message sent to landlord Frontend!');
+    }
+
+  } catch (error) {
+    console.error(error.response?.data || error.message);
+    toast.error(data.message ||'Failed to send message. Try again.');
+  }
+};
+
+
+      
 
   return (
     <aside className="space-y-6">
       {/* Price Card */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm sticky top-24">
+      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm  top-24">
         <div className="mb-6">
           <div className="flex items-end gap-1">
             <span className="text-3xl font-bold text-teal-600">${price}</span>
@@ -39,16 +77,26 @@ export default function PropertyCostSidebar({ price, baseRent, utilities, availa
           </div>
           <span className="text-sm font-bold text-gray-800">{availableFrom}</span>
         </div>
-
-        {!showMessageBox ? (
-          <Button
-            onClick={() => setShowMessageBox(true)}
-            className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-teal-600/20 mb-6 flex items-center justify-center gap-2"
-          >
+        
+        {!showMessageBox && (
+          <Button onClick={() => { 
+            if (!isLoggedIn) {
+                toast.error("Please log in to be able to contact the landlord");
+                navigate('/login');
+                return;
+              }
+              if (isOwner) {
+                toast.error("You cannot contact your own listing");
+                return;
+              }
+              setShowMessageBox(true);
+            }} className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-teal-600/20 mb-6 flex items-center justify-center gap-2" >
             <MessageCircle size={18} />
             Contact Landlord
           </Button>
-        ) : (
+        )}
+
+        {isLoggedIn && !isOwner && showMessageBox && (
           <div className="space-y-3 mb-6">
             <textarea
               value={message}
@@ -59,11 +107,7 @@ export default function PropertyCostSidebar({ price, baseRent, utilities, availa
             />
             <div className="flex gap-2">
               <Button
-                onClick={() => {
-                  alert('Message sent: ' + message);
-                  setMessage('');
-                  setShowMessageBox(false);
-                }}
+                onClick={handleSendMessage}
                 className="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-lg flex items-center justify-center gap-2"
               >
                 <Send size={16} />

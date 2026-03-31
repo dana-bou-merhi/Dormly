@@ -157,6 +157,7 @@ const [selectedId, setSelectedId] = useState(null);
                   {filtered.map((p) => (
                     <tr key={p._id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-6 py-4">
+                         <Link to={`/property/${p._id}`} className="flex items-center gap-3">
                         <div className="flex items-center gap-3">
                           <div className="w-14 h-14 rounded-lg overflow-hidden bg-slate-100 shrink-0">
                             {p.image ? <img src={p.image} className="w-full h-full object-cover" /> : <Building2 className="m-auto mt-3 text-slate-400" />}
@@ -166,6 +167,7 @@ const [selectedId, setSelectedId] = useState(null);
                             <p className="text-xs text-slate-400">{p.type || "N/A"}</p>
                           </div>
                         </div>
+                        </Link>
                       </td>
 
                       <td className="px-6 py-4 text-sm text-slate-600">
@@ -186,7 +188,7 @@ const [selectedId, setSelectedId] = useState(null);
 
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-2">
-                          <Link to={`/landlord/edit-property/${p._id}`} className="p-2 text-teal-600 hover:bg-teal-50 rounded-full transition-colors">
+                          <Link to={`/edit-property/${p._id}`} className="p-2 text-teal-600 hover:bg-teal-50 rounded-full transition-colors">
                             <Edit2 size={16} />
                           </Link>
                           <button    onClick={() => confirmDeleteProperty(p._id)} disabled={deletingId === p._id} className="p-2 text-rose-500 hover:bg-rose-50 rounded-full transition-colors">

@@ -53,6 +53,7 @@ function App() {
         <Route path="/favorite"                element={<FavoriteDorms />} />
         <Route path='/new-prop' element={<NewAddProperty/>}/>
         <Route path='/landlord/listing' element={<LandlordListingsPage/>} />
+        <Route path="/edit-property/:id" element={<NewAddProperty />} />
         
        
       </Routes>
