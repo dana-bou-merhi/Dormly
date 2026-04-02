@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
 
-export default function PropertyCostSidebar({ price, baseRent, utilities, availableFrom, landlord, propertyId }) {
+export default function PropertyCostSidebar({ price, baseRent, utilities, availableFrom, landlord, propertyId, priceUnit }) {
   const [showMessageBox, setShowMessageBox] = useState(false);
   const [message, setMessage] = useState('');
   const {user} = useSelector(store =>store.auth);
@@ -51,7 +51,7 @@ const isOwner = user?._id === landlord?.user?._id;
         <div className="mb-6">
           <div className="flex items-end gap-1">
             <span className="text-3xl font-bold text-teal-600">${price}</span>
-            <span className="text-gray-400 text-sm mb-1">/month</span>
+            <span className="text-gray-400 text-sm mb-1">/{priceUnit}</span>
           </div>
           <p className="text-xs text-gray-400 mt-1">Total Rent for Long Stay</p>
         </div>

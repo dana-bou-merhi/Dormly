@@ -59,6 +59,64 @@ export const sendMessage = async (req, res) => {
   }
 };
 
+// new added 
+
+export const replyToMessage = async (req, res) => {
+  try {
+    const { messageId, content } = req.body;
+
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authenticated"
+      });
+    }
+
+    const originalMessage = await Message.findById(messageId);
+
+    if (!originalMessage) {
+      return res.status(404).json({
+        success: false,
+        message: "Message not found"
+      });
+    }
+
+    // Only receiver (landlord) can reply
+    if (originalMessage.receiver.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to reply"
+      });
+    }
+
+    // Create reply (reverse sender/receiver)
+    const replyMessage = await Message.create({
+      sender: req.user._id,
+      receiver: originalMessage.sender,
+      propertyId: originalMessage.propertyId,
+      content,
+      status: "replied"
+    });
+
+    // Update original message status
+    originalMessage.status = "replied";
+    await originalMessage.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "Reply sent successfully",
+      data: replyMessage
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send reply"
+    });
+  }
+};
+
 
 export const getUserConversations = async (req, res) => {
   try {
@@ -83,7 +141,7 @@ export const getUserConversations = async (req, res) => {
 
       if (!conversationsMap.has(key)) {
         conversationsMap.set(key, {
-          id: key,
+          id: msg._id ,//key,
 
           user: {
             _id: otherUser._id,
@@ -101,7 +159,7 @@ export const getUserConversations = async (req, res) => {
           
           lastMessage: msg.content,
           sentAt: msg.createdAt,
-        status: msg.status,
+        status: msg.status || "pending",
          isMine: isSender 
         });
       }

@@ -37,7 +37,7 @@ const packages = [
     tier: "Student",
     emoji: "🎓",
     tagline: "Everything a student actually needs",
-    monthlyAdd: 40,
+    monthlyAdd: 50,
     listings: 11,
     savingsPct: 25,
     popular: true,

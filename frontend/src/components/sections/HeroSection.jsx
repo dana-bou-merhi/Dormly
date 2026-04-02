@@ -4,11 +4,11 @@ import { useNavigate } from "react-router-dom";
 import DataStrips from "./DataStrips";
  
 const POPULAR_SEARCHES = [
-  { label: "Near AUB",      icon: "🎓" },
-  { label: "Near LAU",      icon: "🏛️" },
+  { label: "AUB ",      icon: "🎓" },
+  { label: "LAU",      icon: "🏛️" },
   { label: "Hamra Studios", icon: "🏠" },
-  { label: "Shared Rooms",  icon: "👥" },
-  { label: "Female-Only",   icon: "🔒" },
+  { label: "Shared Room",  icon: "👥" },
+  { label: "Single Room",   icon: "🔒" },
 ];
  
 export default function HeroSection() {

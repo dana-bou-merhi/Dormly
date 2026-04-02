@@ -494,7 +494,7 @@ export default function AdminDashboard() {
                                                         <td className="px-6 py-4 text-right">
                                                             <div className="flex items-center justify-end gap-1">
                                                                 <Link
-                                                                    to={`/admin/edit-property/${p._id}`}
+                                                                    to={`/edit-property/${p._id}`}
                                                                     className="p-2 text-teal-600 hover:bg-teal-50 rounded-full transition-colors"
                                                                     title="Edit"
                                                                 >
@@ -691,9 +691,11 @@ export default function AdminDashboard() {
 
                 <div className="p-4 mt-auto border-t border-slate-100">
                     <div className="flex items-center gap-3 p-2">
+                        <Link to={'/profile'}>
                         <div className="w-9 h-9 rounded-full bg-teal-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
                             {user?.username?.[0]?.toUpperCase() || 'A'}
                         </div>
+                        </Link>
                         <div className="flex-1 overflow-hidden">
                             <p className="text-sm font-semibold truncate">{user?.username || 'Admin'}</p>
                             <p className="text-xs text-slate-500 truncate">{user?.email}</p>

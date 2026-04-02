@@ -223,7 +223,7 @@ export default function PropertyDetails() {
          
           
           <PropertyCostSidebar price={property.price} baseRent={property.baseRent} utilities={property.utilities} 
-          availableFrom={property.availableFrom} landlord={property.landlord} propertyId={property._id} />
+          availableFrom={property.availableFrom} landlord={property.landlord} propertyId={property._id} priceUnit={property.priceUnit} />
         </div>
       </main>
 

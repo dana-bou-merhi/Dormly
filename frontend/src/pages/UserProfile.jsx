@@ -103,6 +103,36 @@ function InquiryCard({ inquiry }) {
   // Format date from backend
     const s = INQUIRY_STATUS[inquiry.status] || INQUIRY_STATUS.pending;
   const StatusIcon = s.icon;
+  const [showReply, setShowReply] = useState(false);
+const [replyText, setReplyText] = useState("");
+const API_URL = import.meta.env.VITE_API_URL;
+
+const handleReply = async () => {
+  if (!replyText.trim()) return;
+
+  try {
+     const res = await axios.post(`${API_URL}/api/messages/reply`, {
+      messageId: inquiry.id,
+      content: replyText
+    }, {withCredentials:true});
+
+     toast.success(res.data.message || "Reply sent");
+
+    setReplyText("");
+    setShowReply(false);
+
+    // to refresh but not tested yet 
+     window.location.reload();
+
+  } catch (error) {
+    //console.error(error);
+    const message = error.response?.data?.message || "Something went wrong";
+
+    toast.error(message);
+    console.error(error);
+  }
+};
+
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
@@ -169,9 +199,27 @@ function InquiryCard({ inquiry }) {
               </button>
             </Link>
             <span className="text-slate-200">·</span>
+
+              {/* NEW Reply Button */}
+              {!inquiry.isMine && (
+                <button  onClick={() => setShowReply(!showReply)}    className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-700"   >
+                  Reply
+                </button>
+              )}
            
           </div>
         </div>
+        {/*or if i need it beside the reply make it up 2 divs  */}
+        {showReply && (
+                <div className="mt-3 flex items-center gap-2">
+                  <input type="text"   value={replyText}  onChange={(e) => setReplyText(e.target.value)}  placeholder="Write a reply..."
+                    className="flex-1 text-xs border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                  />
+                  <button  onClick={handleReply}  className="text-xs bg-teal-600 text-white px-3 py-1.5 rounded-lg hover:bg-teal-700"  >
+                    Send
+                  </button>
+                </div>
+              )}
       </div>
     </article>
   );
