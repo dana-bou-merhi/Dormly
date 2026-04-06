@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button.jsx';
 import { toast } from 'sonner';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
+ 
 const SignUp = () => {
   const [role, setRole] = useState('student');
   const [showPassword, setShowPassword] = useState(false);
@@ -16,14 +16,14 @@ const SignUp = () => {
   const [submitError, setSubmitError] = useState('');
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
-
+ 
   const [user, setUser] = useState({
     username: '',
     email: '',
     password: '',
     role: 'student'
   });
-
+ 
   const handleRoleChange = (newRole) => {
     setRole(newRole);
     setUser(prev => ({
@@ -31,7 +31,7 @@ const SignUp = () => {
     role: newRole
   }));
   };
-
+ 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUser(prev => ({
@@ -39,10 +39,51 @@ const SignUp = () => {
       [name]: value
     }));
   };
-
+ 
+  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+  const LINKEDIN_CLIENT_ID = import.meta.env.VITE_LINKEDIN_CLIENT_ID || '';
+  const LINKEDIN_REDIRECT_URI = import.meta.env.VITE_LINKEDIN_REDIRECT_URI || 'http://localhost:5173/auth/linkedin/callback';
+ 
+  const handleGoogleClick = () => {
+    if (!GOOGLE_CLIENT_ID) { toast.error('Google sign-in is not configured yet.'); return; }
+    const script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+    if (!script) {
+      const s = document.createElement('script');
+      s.src = 'https://accounts.google.com/gsi/client';
+      s.async = true;
+      s.onload = () => promptGoogle();
+      document.body.appendChild(s);
+    } else {
+      promptGoogle();
+    }
+  };
+ 
+  const promptGoogle = () => {
+    if (!window.google) return;
+    window.google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: async (response) => {
+      try {
+        const res = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:8000/api') + '/user/auth/google', {
+          method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ credential: response.credential }),
+        });
+        const data = await res.json();
+        if (data.success) { toast.success(data.message); navigate('/'); }
+        else toast.error(data.message);
+      } catch { toast.error('Google sign-up failed.'); }
+    }});
+    window.google.accounts.id.prompt();
+  };
+ 
+  const handleLinkedInClick = () => {
+    if (!LINKEDIN_CLIENT_ID) { toast.error('LinkedIn sign-in is not configured yet.'); return; }
+    const params = new URLSearchParams({ response_type: 'code', client_id: LINKEDIN_CLIENT_ID,
+      redirect_uri: LINKEDIN_REDIRECT_URI, scope: 'openid profile email', state: 'linkedin_oauth' });
+    window.location.href = `https://www.linkedin.com/oauth/v2/authorization?${params}`;
+  };
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+ 
       if (!agreeTerms) {
     toast.error("You must agree to the terms first.");
     return;
@@ -54,7 +95,7 @@ const SignUp = () => {
   }, 
   withCredentials: true
 });
-
+ 
     if(res.data.success){
       toast.success(res.data.message);
       navigate('/login');
@@ -66,7 +107,7 @@ const SignUp = () => {
   //  toast.error(error.response?.data?.message || "Registration failed. Please try again.");
   }
   };
-
+ 
   return (
     <div className="h-screen overflow-hidden flex">
       
@@ -118,7 +159,7 @@ const SignUp = () => {
           </div>
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-teal-900/80 to-transparent"></div>
         </aside>
-
+ 
      
       <section className="flex-1 flex items-center justify-center p-6 md:p-10 lg:p-12 bg-slate-100">
         <div className="w-full max-w-md">
@@ -132,12 +173,12 @@ const SignUp = () => {
             </div>
             <span className="text-2xl font-bold tracking-tight text-[#007B83]">Dormly</span>
           </header>
-
+ 
           <header className="mb-7">
             <h2 className="text-2xl font-bold text-slate-900">Create an account</h2>
             <p className="text-slate-500 mt-1">Join thousands of students finding their perfect dorm.</p>
           </header>
-
+ 
           {/* Role */}
           <div className="bg-white p-1.5 rounded-xl mb-6 flex shadow-sm  ">
             <button 
@@ -163,7 +204,7 @@ const SignUp = () => {
               I'm a Landlord
             </button>
           </div>
-
+ 
           <form className="space-y-4" onSubmit={handleSubmit}>
             
             <Input label="Username"  icon={User}   id="username"  name="username"  type="text" placeholder="John Doe"
@@ -182,7 +223,7 @@ const SignUp = () => {
                 onChange={handleInputChange}
                 required
               />
-
+ 
             {/* Password Field */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium text-slate-700" htmlFor="password">
@@ -213,9 +254,9 @@ const SignUp = () => {
                 </button>
               </div>
             </div>
-
+ 
             
-
+ 
             
               <div className="flex items-start gap-3 py-1">
                 <Checkbox id="terms"  checked={agreeTerms}  onCheckedChange={(checked) => setAgreeTerms(checked)}
@@ -232,22 +273,42 @@ const SignUp = () => {
                   .
                 </label>
               </div>
-
+ 
                 {submitError && (
                   <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-50 border border-red-200">
                     <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
                     <p className="text-sm text-red-600">{submitError}</p>
                   </div>
                 )}
-
+ 
              <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold 
              py-6 rounded-xl shadow-lg shadow-teal-600/20 transition-all transform hover:-translate-y-0.5 active:translate-y-0" >
                 Create Account
               </Button>
-
+ 
           </form>
-
+ 
           
+          {/* Social Sign Up */}
+          <div className="relative mt-6">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>
+            <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-widest text-gray-400">
+              <span className="px-4 bg-slate-100">Or sign up with</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            <button type="button" onClick={handleGoogleClick}
+              className="flex items-center justify-center gap-2 py-3 px-4 border border-gray-200 rounded-xl hover:bg-gray-50 bg-white transition text-sm font-medium text-gray-700">
+              <img src="/images/Google icon.png" alt="Google" className="w-5 h-5" />
+              Google
+            </button>
+            <button type="button" onClick={handleLinkedInClick}
+              className="flex items-center justify-center gap-2 py-3 px-4 border border-gray-200 rounded-xl hover:bg-gray-50 bg-white transition text-sm font-medium text-gray-700">
+              <img src="/images/linkedin logo.png" alt="LinkedIn" className="w-5 h-5" />
+              LinkedIn
+            </button>
+          </div>
+ 
           <div className="mt-6 pt-6 border-t border-slate-200 text-center">
             <p className="text-sm text-slate-600">
               Already have an account?{' '}
@@ -261,5 +322,5 @@ const SignUp = () => {
     </div>
   );
 };
-
+ 
 export default SignUp;

@@ -8,44 +8,60 @@ import { ChevronDown, Loader2 } from 'lucide-react';
  
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
  
+const PACKAGE_LABELS = {
+  essential: { label: "🏠 Essential Package", color: "bg-slate-100 text-slate-700" },
+  student:   { label: "🎓 Student Package",   color: "bg-teal-50 text-teal-700"   },
+  premium:   { label: "✨ Premium Package",   color: "bg-amber-50 text-amber-700" },
+};
+ 
 export default function ListingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [allListings, setAllListings]   = useState([]);
   const [loading, setLoading]           = useState(true);
  
-  // Read initial values from URL (set by HeroSection)
+  // Read all possible filter params from URL
   const [filters, setFilters] = useState({
-    search:    searchParams.get('search') || '',
+    search:    searchParams.get('search')   || '',
     location:  'All',
-    roomTypes: searchParams.get('type') ? [searchParams.get('type')] : [],
-    minPrice:  '',
-    maxPrice:  '',
+    roomTypes: searchParams.get('type')     ? [searchParams.get('type')] : [],
+    minPrice:  searchParams.get('minPrice') || '',
+    maxPrice:  searchParams.get('maxPrice') || '',
     amenities: [],
-    status:    '',
+    status:    searchParams.get('status')   || '',
+    package:   searchParams.get('package')  || '',
   });
   const [sortBy, setSortBy] = useState('Recommended');
  
-  // Fetch all properties from backend
-  useEffect(() => {
-    const fetchListings = async () => {
-      try {
-        setLoading(true);
-        const res  = await fetch(`${API_URL}/api/properties?limit=100`);
-        const data = await res.json();
-        if (data.success) setAllListings(data.properties);
-      } catch (err) {
-        console.error('Failed to fetch listings', err);
-      } finally {
-        setLoading(false);
+  // Fetch all properties
+ useEffect(() => {
+  const fetchListings = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_URL}/properties?limit=100`);
+      
+      // 1. Check if the response is actually OK (Status 200-299)
+      if (!res.ok) {
+        throw new Error(`Server responded with ${res.status}`);
       }
-    };
-    fetchListings();
-  }, []);
+
+      // 2. Safely parse JSON
+      const data = await res.json();
+      
+      if (data.success) {
+        setAllListings(data.properties);
+      }
+    } catch (err) {
+      console.error('Failed to fetch listings:', err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchListings();
+}, []);
  
   // Filter
   const filteredListings = useMemo(() => {
     return allListings.filter(l => {
-      // Text search — title, location, description, type
       if (filters.search) {
         const q = filters.search.toLowerCase();
         const matches =
@@ -58,9 +74,11 @@ export default function ListingsPage() {
       if (filters.location !== 'All' && !l.location?.toLowerCase().includes(filters.location.toLowerCase())) return false;
       if (filters.roomTypes.length > 0 && !filters.roomTypes.includes(l.type)) return false;
       if (filters.status && l.status !== filters.status) return false;
+ 
       const min = filters.minPrice ? parseInt(filters.minPrice) : 0;
       const max = filters.maxPrice ? parseInt(filters.maxPrice) : Infinity;
       if (l.price < min || l.price > max) return false;
+ 
       if (filters.amenities.length > 0) {
         const has = filters.amenities.every(a => l.amenities?.includes(a) || l.amenityLabels?.includes(a));
         if (!has) return false;
@@ -82,7 +100,7 @@ export default function ListingsPage() {
   }, [filteredListings, sortBy]);
  
   const handleResetFilters = () => {
-    setFilters({ search: '', location: 'All', roomTypes: [], minPrice: '', maxPrice: '', amenities: [], status: '' });
+    setFilters({ search: '', location: 'All', roomTypes: [], minPrice: '', maxPrice: '', amenities: [], status: '', package: '' });
     setSearchParams({});
   };
  
@@ -93,6 +111,7 @@ export default function ListingsPage() {
     }));
  
   const locations = ['All', ...new Set(allListings.map(l => l.location?.split(',')[0]).filter(Boolean))];
+  const activePackage = filters.package ? PACKAGE_LABELS[filters.package] : null;
  
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
@@ -110,6 +129,14 @@ export default function ListingsPage() {
               </button>
             </div>
  
+            {/* Active package banner */}
+            {activePackage && (
+              <div className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold ${activePackage.color}`}>
+                <span>{activePackage.label}</span>
+                <button onClick={() => { setFilters(p => ({ ...p, package: '' })); setSearchParams(prev => { prev.delete('package'); return prev; }); }} className="ml-2 opacity-60 hover:opacity-100">✕</button>
+              </div>
+            )}
+ 
             {/* Text search */}
             <section>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Search</label>
@@ -125,11 +152,8 @@ export default function ListingsPage() {
             {/* Location */}
             <section>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Location</label>
-              <select
-                value={filters.location}
-                onChange={e => setFilters(p => ({ ...p, location: e.target.value }))}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm p-2.5 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              >
+              <select value={filters.location} onChange={e => setFilters(p => ({ ...p, location: e.target.value }))}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm p-2.5 focus:ring-2 focus:ring-teal-500 focus:border-transparent">
                 {locations.map(l => <option key={l}>{l}</option>)}
               </select>
             </section>
@@ -137,11 +161,8 @@ export default function ListingsPage() {
             {/* Status */}
             <section>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Availability</label>
-              <select
-                value={filters.status}
-                onChange={e => setFilters(p => ({ ...p, status: e.target.value }))}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm p-2.5 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              >
+              <select value={filters.status} onChange={e => setFilters(p => ({ ...p, status: e.target.value }))}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm p-2.5 focus:ring-2 focus:ring-teal-500 focus:border-transparent">
                 <option value="">All</option>
                 <option value="Available Now">Available Now</option>
                 <option value="Coming Soon">Coming Soon</option>
@@ -169,12 +190,14 @@ export default function ListingsPage() {
               <div className="flex items-center gap-2">
                 <div className="relative w-full">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
-                  <input type="number" placeholder="Min" value={filters.minPrice} onChange={e => setFilters(p => ({ ...p, minPrice: e.target.value }))}
+                  <input type="number" placeholder="Min" value={filters.minPrice}
+                    onChange={e => setFilters(p => ({ ...p, minPrice: e.target.value }))}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm py-2 pl-6 pr-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none" />
                 </div>
                 <div className="relative w-full">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
-                  <input type="number" placeholder="Max" value={filters.maxPrice} onChange={e => setFilters(p => ({ ...p, maxPrice: e.target.value }))}
+                  <input type="number" placeholder="Max" value={filters.maxPrice}
+                    onChange={e => setFilters(p => ({ ...p, maxPrice: e.target.value }))}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm py-2 pl-6 pr-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none" />
                 </div>
               </div>
@@ -184,7 +207,7 @@ export default function ListingsPage() {
             <section>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Amenities</label>
               <div className="space-y-2.5">
-                {['WiFi', 'AC Units', '24/7 Elec', 'Security Cameras', 'Laundry Room', 'Elevator'].map(a => (
+                {['Free Wi-Fi', 'AC Units', 'Generator 24/7', 'Security Cameras', 'Laundry Room', 'Elevator'].map(a => (
                   <label key={a} className="flex items-center gap-3 cursor-pointer group">
                     <input type="checkbox" checked={filters.amenities.includes(a)} onChange={() => toggleArr('amenities', a)}
                       className="w-4 h-4 rounded text-teal-600 border-slate-300 focus:ring-teal-500/20" />
@@ -200,7 +223,9 @@ export default function ListingsPage() {
         <section className="flex-1">
           <header className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4 border-b border-slate-100 pb-3">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Verified Dorms</h1>
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                {activePackage ? activePackage.label : 'Verified Dorms'}
+              </h1>
               <p className="text-teal-600 text-sm mt-1 font-medium">
                 {loading ? 'Loading…' : `Showing ${sortedListings.length} properties`}
                 {filters.search && !loading && (

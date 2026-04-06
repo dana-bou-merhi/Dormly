@@ -19,7 +19,7 @@ export default function Header() {
 
   const handleLogout= async(e)=> {
     try {
-      const res = await axios.get(`${API_URL}/api/user/logout`, {withCredentials: true});
+      const res = await axios.get(`${API_URL}/user/logout`, {withCredentials: true});
       if(res.data.success){
         navigate('/login');
         dispatch(setUser(null));

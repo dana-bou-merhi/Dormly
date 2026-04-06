@@ -47,7 +47,7 @@ export default function FeaturesCardListings() {
     const fetchProperties = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${API_URL}/api/properties`);
+        const res = await axios.get(`${API_URL}/properties`);
         
         setListings(res.data.properties || []);
       } catch (error) {
