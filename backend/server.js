@@ -8,7 +8,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { OpenAI } from 'openai/client.js';
 import messageRouter from './routes/message.routes.js';
-
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 dotenv.config();
 
@@ -30,38 +30,41 @@ app.use('/api/properties', propertyRoute);
 app.use('/api/admin', adminRoute);
 app.use('/api/messages', messageRouter);
 
-// ai use
-/*const openai = new OpenAI({
-    apiKey:process.env.OPENAI_API_KEY,
-})
+// new gemeni ai use
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.post('/api/aichat', async (req, res) => {
   try {
     const { message } = req.body;
+    
+    // Use Gemini 2.5 Flash for the free tier
+    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
-    console.log("Incoming message:", message);
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        { role: "user", content: message }
-      ]
+    // System instruction to give the bot context about Dormly and Lebanon
+    const chat = model.startChat({
+      history: [
+        {
+          role: "user",
+          parts: [{ text: "You are Dormly AI, an assistant for a Lebanese student housing platform. Help students find dorms in Beirut, Hamra, and Bekaa. The website contains many dorms with all necessary details for each dorm" }],
+        },
+        {
+          role: "model",
+          parts: [{ text: "Understood. I am ready to help students with their housing queries in Lebanon. Tell them also to browse the available dorms on our platform." }],
+        },
+      ],
     });
 
-    console.log("Full OpenAI response:", completion);
-
-    const aiResponse = completion.choices?.[0]?.message?.content;
-
-    console.log("Extracted AI response:", aiResponse);
-
-    res.json({ message: aiResponse });
-
+    const result = await chat.sendMessage(message);
+    const response = await result.response;
+    
+    res.json({ message: response.text() });
   } catch (error) {
-    console.error("ERROR:", error);
-    res.status(500).json({ error: "Error processing your request" });
+    console.error(error);
+    res.status(500).json({ message: "AI is resting. Try again in a bit!" });
   }
 });
-*/
+
+
 
 // Health check
 app.get('/api/health', (_, res) => res.json({ status: 'ok', timestamp: new Date() }));

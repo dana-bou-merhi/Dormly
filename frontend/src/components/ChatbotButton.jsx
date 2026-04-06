@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { X, Minus, Send, Bot} from 'lucide-react';
+import { X, Minus, Send, Bot, Loader2} from 'lucide-react';
+import axios from 'axios';
+
 
 export default function ChatbotButton() {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,6 +13,7 @@ export default function ChatbotButton() {
   ]);
   const [inputValue, setInputValue] = useState('');
    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+   const [isLoading, setIsLoading] = useState(false);
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -18,38 +21,8 @@ export default function ChatbotButton() {
 
   const handleSendMessage = async () => {
 
-   /*  if (!inputValue.trim()) return;
-
-  const userMessage = inputValue;
-
-  // Add user message immediately
-  setMessages((prev) => [...prev, { type: 'user', text: userMessage }]);
-  setInputValue('');
-
-  try {
-    const response = await fetch(`${API_URL}/api/aichat`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ message: userMessage }),
-    });
-
-    const data = await response.json();
-
-    // Add AI response
-    setMessages((prev) => [
-      ...prev,
-      { type: 'bot', text: data.message },
-    ]);
-
-  } catch (error) {
-    setMessages((prev) => [
-      ...prev,
-      { type: 'bot', text: 'Error connecting to AI. Please try again.' },
-    ]);
-  }*/
-    if (inputValue.trim()) {
+  // main page without api call 
+   /* if (inputValue.trim()) {
       setMessages([...messages, { type: 'user', text: inputValue }]);
       setInputValue('');
       // Simulate bot response
@@ -59,7 +32,37 @@ export default function ChatbotButton() {
           { type: 'bot', text: 'Thanks for your question! I\'m here to help.' },
         ]);
       }, 500);
-    }
+    }*/
+   if (!inputValue.trim() ) return;
+
+  const userMessage = inputValue;
+  
+  // Update UI immediately
+  setMessages((prev) => [...prev, { type: 'user', text: userMessage }]);
+  setInputValue('');
+  setIsLoading(true);
+
+  try {
+    const response = await axios.post( `${API_URL}/api/aichat`,   { message: userMessage },   { withCredentials: true }  );
+
+    // AI Response from backend
+    setMessages((prev) => [
+      ...prev, 
+      { type: 'bot', text: response.data.message }
+    ]);
+
+  } catch (error) {
+    console.error("Chat Error:", error);
+    setMessages((prev) => [
+      ...prev, 
+      { type: 'bot', text: "Connection error. Make sure the server is running." }
+    ]);
+  } finally {
+    setIsLoading(false);
+    console.log("Message sent and response handled.");
+  }
+
+
   };
 
   return (
@@ -94,10 +97,7 @@ export default function ChatbotButton() {
               >
                 <Minus size={20} />
               </button>
-              <button
-                onClick={toggleChat}
-                className="text-slate-400 hover:text-white transition p-1"
-                aria-label="Close"
+              <button  onClick={toggleChat}   className="text-slate-400 hover:text-white transition p-1"    aria-label="Close"
               >
                 <X size={20} />
               </button>
@@ -107,17 +107,13 @@ export default function ChatbotButton() {
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
             {messages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`flex gap-3 ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
+              <div  key={idx}    className={`flex gap-3 ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}  >
                 {msg.type === 'bot' && (
                   <div className="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center shrink-0">
                     <Bot size={16} className="text-white" />
                   </div>
                 )}
-                <div
-                  className={`max-w-xs rounded-2xl px-4 py-3 ${
+                <div className={`max-w-xs rounded-2xl px-4 py-3 ${
                     msg.type === 'user'
                       ? 'bg-teal-500 text-white rounded-br-none'
                       : 'bg-white text-gray-800 border border-gray-200 rounded-bl-none'
@@ -127,34 +123,15 @@ export default function ChatbotButton() {
                 </div>
               </div>
             ))}
-
-            {/* Utility Cost Card */}
-            <div className="bg-teal-50 rounded-2xl border border-teal-200 p-4 mt-4">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-6 h-6 text-teal-600">
-                  <Bot size={16} />
+            
+            {/* 4. ADD THIS "THINKING" INDICATOR */}
+              {isLoading && (
+                <div className="flex items-center space-x-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg max-w-[70%] self-start animate-pulse">
+                  {/* Optional: Add a spinning circle icon if you have lucide-react installed */}
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Dormly AI is thinking...</span>
                 </div>
-                <h4 className="font-bold text-teal-600 text-sm uppercase tracking-wide">Utility Cost Estimate</h4>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-700">Bldg Generator (5A)</span>
-                  <span className="font-semibold text-gray-900">$65 - $80</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-700">EDL (State Power)</span>
-                  <span className="font-semibold text-gray-900">$12 - $20</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-700">High-Speed Fiber</span>
-                  <span className="font-semibold text-gray-900">$25</span>
-                </div>
-                <div className="border-t border-teal-200 pt-2 mt-2 flex justify-between">
-                  <span className="font-bold text-gray-900">Est. Total</span>
-                  <span className="font-bold text-teal-600">~$110/mo</span>
-                </div>
-              </div>
-            </div>
+              )}
 
             {/* Action Buttons */}
             <div className="flex gap-2 mt-3">
