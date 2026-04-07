@@ -44,7 +44,7 @@ export const googleAuth = async (req, res) => {
             if (user.authProvider === 'local') {
                 user.authProvider = 'google';
                 user.providerId = googleId;
-                if (picture && user.profilePicture === '/images/user.jpeg') user.profilePicture = picture;
+                if (picture && user.profilePicture === 'http://localhost:5173/images/user.jpeg') user.profilePicture = picture;
                 await user.save();
             }
         } else {
@@ -54,7 +54,7 @@ export const googleAuth = async (req, res) => {
                 password:       '',
                 authProvider:   'google',
                 providerId:     googleId,
-                profilePicture: picture || '/images/user.jpeg',
+                profilePicture: picture || 'http://localhost:5173/images/user.jpeg',
                 role:           'student',
             });
         }

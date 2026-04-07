@@ -6,7 +6,7 @@ import ListingCard from '@/components/ListingCards';
 import { Button } from '@/components/ui/button.jsx';
 import { ChevronDown, Loader2 } from 'lucide-react';
  
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL ||  'http://localhost:8000';
  
 const PACKAGE_LABELS = {
   essential: { label: "🏠 Essential Package", color: "bg-slate-100 text-slate-700" },
@@ -37,7 +37,7 @@ export default function ListingsPage() {
   const fetchListings = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_URL}/properties?limit=100`);
+      const res = await fetch(`${API_URL}/api/properties?limit=100`);
       
       // 1. Check if the response is actually OK (Status 200-299)
       if (!res.ok) {

@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { useDispatch, useSelector } from 'react-redux';
 import { setLoading, setUser } from '@/redux/authSlice';
  
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 const LINKEDIN_CLIENT_ID = import.meta.env.VITE_LINKEDIN_CLIENT_ID || '';
 const LINKEDIN_REDIRECT_URI = import.meta.env.VITE_LINKEDIN_REDIRECT_URI || 'http://localhost:5173/auth/linkedin/callback';
@@ -57,7 +57,8 @@ export default function Login() {
   const handleGoogleCredential = async (response) => {
     setGoogleLoading(true);
     try {
-      const res  = await axios.post(`${API_URL}/user/auth/google`, { credential: response.credential }, { withCredentials: true });
+      
+      const res  = await axios.post(`${API_URL}/api/user/auth/google`, { credential: response.credential }, { withCredentials: true });
       if (res.data.success) {
         dispatch(setUser(res.data.user));
         toast.success(res.data.message);
@@ -92,7 +93,9 @@ export default function Login() {
   const handleLinkedInCallback = async (code) => {
     dispatch(setLoading(true));
     try {
-      const res = await axios.post(`${API_URL}/user/auth/linkedin`, { code, redirectUri: LINKEDIN_REDIRECT_URI }, { withCredentials: true });
+      const url = `${API_URL}/api/user/auth/linkedin`;
+console.log("FINAL URL:", url);
+      const res = await axios.post(`${API_URL}/api/user/auth/linkedin`, { code, redirectUri: LINKEDIN_REDIRECT_URI }, { withCredentials: true });
       if (res.data.success) {
         dispatch(setUser(res.data.user));
         toast.success(res.data.message);
@@ -111,7 +114,7 @@ export default function Login() {
     setError('');
     try {
       dispatch(setLoading(true));
-      const response = await axios.post(`${API_URL}/user/login`, formData, { withCredentials: true });
+      const response = await axios.post(`${API_URL}/api/user/login`, formData, { withCredentials: true });
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         dispatch(setUser(response.data.user));

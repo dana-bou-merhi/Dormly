@@ -8,7 +8,7 @@ import { setUser, setLoading } from '@/redux/authSlice';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const LINKEDIN_REDIRECT_URI = import.meta.env.VITE_LINKEDIN_REDIRECT_URI || 'http://localhost:5173/auth/linkedin/callback';
 
 export default function LinkedInCallback() {
@@ -35,7 +35,7 @@ export default function LinkedInCallback() {
     const authenticate = async () => {
       dispatch(setLoading(true));
       try {
-        const res = await fetch(`${API_URL}/user/auth/linkedin`, {
+        const res = await fetch(`${API_URL}/api/user/auth/linkedin`, {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },

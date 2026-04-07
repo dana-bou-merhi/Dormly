@@ -12,14 +12,14 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const {user} = useSelector(store =>store.auth);
-     const API_URL = import.meta.env.VITE_API_URL;
+     const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
      const dispatch = useDispatch();
      const navigate = useNavigate();
 
 
   const handleLogout= async(e)=> {
     try {
-      const res = await axios.get(`${API_URL}/user/logout`, {withCredentials: true});
+      const res = await axios.get(`${API_URL}/api/user/logout`, {withCredentials: true});
       if(res.data.success){
         navigate('/login');
         dispatch(setUser(null));

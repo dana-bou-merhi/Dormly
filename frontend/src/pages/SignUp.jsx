@@ -15,7 +15,7 @@ const SignUp = () => {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const navigate = useNavigate();
-  const API_URL = import.meta.env.VITE_API_URL;
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
  
   const [user, setUser] = useState({
     username: '',
@@ -62,7 +62,7 @@ const SignUp = () => {
     if (!window.google) return;
     window.google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: async (response) => {
       try {
-        const res = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:8000/api') + '/user/auth/google', {
+        const res = await fetch(`${API_URL}/api/user/auth/google`, {
           method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ credential: response.credential }),
         });
