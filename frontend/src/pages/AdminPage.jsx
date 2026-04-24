@@ -16,7 +16,7 @@ import { setUser } from '../redux/authSlice';
 import axios from 'axios';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
 const API = import.meta.env.VITE_API_URL;
-
+/*
 // ─── Reusable stat card ───────────────────────────────────────────────────────
 function StatCard({ label, value, icon: Icon, bgColor, iconColor, sub }) {
     return (
@@ -29,6 +29,25 @@ function StatCard({ label, value, icon: Icon, bgColor, iconColor, sub }) {
                     <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider">{label}</p>
                     <h3 className="text-2xl font-bold text-slate-900">{value ?? '—'}</h3>
                     {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
+                </div>
+            </div>
+        </Card>
+    );
+}*/
+
+function StatCard({ label, value, icon: Icon, bgColor, iconColor, sub }) {
+    return (
+        <Card className="p-5 border-slate-200 hover:shadow-md transition-shadow h-full flex flex-col justify-center">
+            <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                    <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">{label}</p>
+                    <h3 className="text-2xl font-bold text-slate-900 tabular-nums">
+                        {value?.toLocaleString() ?? '0'}
+                    </h3>
+                    {sub && <p className="text-xs font-medium text-slate-400 leading-tight">{sub}</p>}
+                </div>
+                <div className={`shrink-0 w-10 h-10 ${bgColor} rounded-xl flex items-center justify-center ${iconColor}`}>
+                    <Icon size={20} strokeWidth={2.5} />
                 </div>
             </div>
         </Card>
@@ -97,7 +116,7 @@ export default function AdminDashboard() {
         }
     }, []);
 
-    // ── Fetch properties ──────────────────────────────────────────────────────
+    // Fetch properties
     const fetchProperties = useCallback(async () => {
         setLoading(true);
         try {
@@ -120,7 +139,7 @@ export default function AdminDashboard() {
         }
     }, [listPage, listSearch, listStatus]);
 
-    // ── Fetch users ───────────────────────────────────────────────────────────
+    //  Fetch users 
     const fetchUsers = useCallback(async () => {
         setLoading(true);
         try {
@@ -156,29 +175,6 @@ export default function AdminDashboard() {
   setAlertOpen(true); // open the dialog
     };
 
-    // ── Delete property 
-    /*const handleDeleteProperty = async (id) => {
-        if (!window.confirm('Delete this property? This cannot be undone.')) return;
-        setDeletingId(id);
-        try {
-            const res = await fetch(`${API}/api/properties/${id}`, {
-                method: 'DELETE',
-                credentials: 'include',
-            });
-            const data = await res.json();
-            if (data.success) {
-                toast.success('Property deleted.');
-                fetchProperties();
-                fetchStats();
-            } else {
-                toast.error(data.message || 'Delete failed.');
-            }
-        } catch {
-            toast.error('Server error.');
-        } finally {
-            setDeletingId(null);
-        }
-    };*/
 
     const handleDeleteProperty = async () => {
         if (!deletingId) return;
@@ -203,7 +199,7 @@ export default function AdminDashboard() {
             setDeletingId(null);
         }
     };
-    // ── Delete user ───────────────────────────────────────────────────────────
+    // Delete user
     const handleDeleteUser = async (id) => {
         if (!window.confirm('Delete this user? This cannot be undone.')) return;
         setDeletingId(id);
@@ -227,7 +223,7 @@ export default function AdminDashboard() {
         }
     };
 
-    // ── Update user role ──────────────────────────────────────────────────────
+    //  Update user role
     const handleRoleChange = async (userId, newRole) => {
         try {
             const res = await fetch(`${API}/api/admin/users/${userId}/role`, {
@@ -248,14 +244,14 @@ export default function AdminDashboard() {
         }
     };
 
-    // ── Logout ────────────────────────────────────────────────────────────────
+    // ── Logout 
     const handleLogout = async () => {
         await fetch(`${API}/api/user/logout`, { credentials: 'include' });
         dispatch(clearUser());
         navigate('/login');
     };
 
-    // ── Pagination component ──────────────────────────────────────────────────
+    // ── Pagination component 
     const Pagination = ({ page, totalPages, onPage }) => (
         <div className="flex gap-1">
             <button
@@ -286,11 +282,11 @@ export default function AdminDashboard() {
         </div>
     );
 
-    // ─── PAGES ────────────────────────────────────────────────────────────────
+    // ─── PAGES 
     const renderContent = () => {
         switch (currentPage) {
 
-            // ── Dashboard Overview ───────────────────────────────────────────
+            // ── Dashboard Overview
             case 'dashboard':
                 return (
                     <div className="space-y-8">
@@ -317,18 +313,25 @@ export default function AdminDashboard() {
                         </div>
 
                         {/* Stats Grid */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-                            <StatCard label="Total Properties"   value={stats?.properties?.total}       icon={Building2}    bgColor="bg-teal-50"   iconColor="text-teal-600"   sub={`+${stats?.properties?.newThisMonth ?? 0} this month`} />
-                            <StatCard label="Available Now"      value={stats?.properties?.available}   icon={CheckCircle}  bgColor="bg-emerald-50" iconColor="text-emerald-600" />
-                            <StatCard label="Coming Soon"        value={stats?.properties?.comingSoon}  icon={Clock}        bgColor="bg-amber-50"  iconColor="text-amber-600"  />
-                            <StatCard label="Full / Occupied"    value={stats?.properties?.full}        icon={TrendingUp}   bgColor="bg-rose-50"   iconColor="text-rose-600"   />
-                        </div>
+                        <section className="space-y-2">
+                            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Property Metrics</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <StatCard label="Total Units" value={stats?.properties?.total} icon={Building2} bgColor="bg-teal-50" iconColor="text-teal-600" sub={`+${stats?.properties?.newThisMonth ?? 0} new`} />
+                                <StatCard label="Available" value={stats?.properties?.available} icon={CheckCircle} bgColor="bg-emerald-50" iconColor="text-emerald-600" />
+                                <StatCard label="Pending" value={stats?.properties?.comingSoon} icon={Clock} bgColor="bg-amber-50" iconColor="text-amber-600" />
+                                <StatCard label="Occupied" value={stats?.properties?.full} icon={TrendingUp} bgColor="bg-rose-50" iconColor="text-rose-600" />
+                            </div>
+                        </section>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                            <StatCard label="Total Users"        value={stats?.users?.total}            icon={Users}        bgColor="bg-indigo-50" iconColor="text-indigo-600"  sub={`+${stats?.users?.newThisMonth ?? 0} this month`} />
-                            <StatCard label="Students"           value={stats?.users?.students}         icon={GraduationCap} bgColor="bg-sky-50"   iconColor="text-sky-600"    />
-                            <StatCard label="Admins"             value={stats?.users?.admins}           icon={Shield}       bgColor="bg-slate-100" iconColor="text-slate-600"  />
-                        </div>
+                        {/* User Stats - Unified Row */}
+                        <section className="space-y-2 ">
+                            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider">User Directory</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <StatCard label="Total Users" value={stats?.users?.total} icon={Users} bgColor="bg-indigo-50" iconColor="text-indigo-600" sub="Active registrations" />
+                                <StatCard label="Students" value={stats?.users?.students} icon={GraduationCap} bgColor="bg-sky-50" iconColor="text-sky-600" />
+                                <StatCard label="System Admins" value={stats?.users?.admins} icon={Shield} bgColor="bg-slate-100" iconColor="text-slate-600" />
+                            </div>
+                        </section>
 
                         {/* Recent Listings */}
                         {stats?.recentProperties?.length > 0 && (
