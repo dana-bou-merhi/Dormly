@@ -10,10 +10,11 @@ import { useSelector } from 'react-redux';
 const API = import.meta.env.VITE_API_URL;
 
 const AMENITY_OPTIONS = [
-    'WiFi', 'AC Units', '24/7 Elec', 'Cleaning', 'Laundry Room',
+    'WiFi', 'AC Units', '24/7 Elec', 'Cleaning', 'Study Room Access',
     'Security Cameras', 'Elevator', 'Rooftop Access', 'Parking',
-    'Gym Access', 'Laundry Service', 'Secure Building Access',
-    'Meal Plan Options', 'University Shuttle', 'Study Room Access',
+    'Gym Access', 'Laptop-Friendly Desks', 'Secure Building Access',
+    'Meal Plan Options', 'University Shuttle','Close to hospitals',
+     'Backup Generator', 'High-Speed Internet','Single Rooms','Quiet Hours Policy','Printing Station','Large Desks','Natural Lighting','Close to Campus','Common Area'
 ];
 const TYPE_OPTIONS    = ['Single Studio', 'Single Room', 'Double Shared Room', 'Apartment', 'Luxury Apartment', 'Modern Studio'];
 const STATUS_OPTIONS  = ['Available Now', 'Coming Soon', 'Full'];

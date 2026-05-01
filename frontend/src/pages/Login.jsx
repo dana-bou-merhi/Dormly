@@ -8,6 +8,7 @@ import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
 import { useDispatch, useSelector } from 'react-redux';
 import { setLoading, setUser } from '@/redux/authSlice';
+import MajorChoice from './MajorChoice';
  
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
@@ -22,6 +23,7 @@ export default function Login() {
   const dispatch     = useDispatch();
   const { loading }  = useSelector(store => store.auth);
   const [searchParams] = useSearchParams();
+  const [showMajorModal, setShowMajorModal] = useState(false);
  
   // ── Handle LinkedIn callback code in URL ──────────────────────────────────
   useEffect(() => {
@@ -62,7 +64,17 @@ export default function Login() {
       if (res.data.success) {
         dispatch(setUser(res.data.user));
         toast.success(res.data.message);
-        navigate(res.data.user.role === 'admin' ? '/admin' : '/');
+       // navigate(res.data.user.role === 'admin' ? '/admin' : '/');
+       // new modification
+        const role  = res.data.user?.role;
+      const major = res.data.user?.major;
+
+      if (role === 'student' && !major) {
+        setShowMajorModal(true); // ← show modal
+      } else {
+        navigate(role === 'admin' ? '/admin' : '/');
+      }
+
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Google sign-in failed.');
@@ -99,7 +111,18 @@ console.log("FINAL URL:", url);
       if (res.data.success) {
         dispatch(setUser(res.data.user));
         toast.success(res.data.message);
-        navigate(res.data.user.role === 'admin' ? '/admin' : '/');
+        //navigate(res.data.user.role === 'admin' ? '/admin' : '/');
+        
+        const role  = res.data.user?.role;
+      const major = res.data.user?.major;
+
+      if (role === 'student' && !major) {
+        setShowMajorModal(true); // ← show modal
+      } else {
+        navigate(role === 'admin' ? '/admin' : '/');
+      }
+
+
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'LinkedIn sign-in failed.');
@@ -119,7 +142,20 @@ console.log("FINAL URL:", url);
         localStorage.setItem('token', response.data.token);
         dispatch(setUser(response.data.user));
         toast.success(response.data.message);
-        navigate(response.data.user?.role === 'admin' ? '/admin' : '/');
+       // navigate(response.data.user?.role === 'admin' ? '/admin' : '/');
+
+       // new changes for modal 
+        const role  = response.data.user?.role;
+       const major = response.data.user?.major;
+
+  // only show modal for students who haven't set a major yet
+  if (role === 'student' && !major) {
+    setShowMajorModal(true);
+  } else {
+    navigate(role === 'admin' ? '/admin' : '/');
+  }
+
+
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong. Try again.');
@@ -127,6 +163,23 @@ console.log("FINAL URL:", url);
       dispatch(setLoading(false));
     }
   };
+
+  const handleMajorSelect = async (selectedMajor) => {
+  if (selectedMajor !== 'skip') {
+    try {
+      await axios.post(
+        `${API_URL}/api/user/major`,
+        { major: selectedMajor },
+        { withCredentials: true }
+      );
+    } catch {
+      toast.error("Couldn't save major, you can set it later in profile settings.");
+    }
+  }
+  setShowMajorModal(false);
+  navigate('/');
+};
+
  
   return (
     <div className="min-h-screen flex flex-col bg-linear-to-br from-gray-50 to-gray-100 font-sans">
@@ -204,6 +257,12 @@ console.log("FINAL URL:", url);
           </div>
         </section>
       </main>
+      {showMajorModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <MajorChoice onSelect={handleMajorSelect} />
+        </div>
+      )}
+
     </div>
   );
 }

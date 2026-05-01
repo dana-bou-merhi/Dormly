@@ -6,8 +6,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 const API = import.meta.env.VITE_API_URL;
-
-const AMENITY_OPTIONS = ['WiFi', 'AC Units', '24/7 Elect', 'Cleaning', 'Laundry Room', 'Security Cameras', 'Elevator', 'Rooftop Access', 'Parking'];
+// new added from the backup part in anemety 
+const AMENITY_OPTIONS = ['WiFi', 'AC Units', '24/7 Elect', 'Cleaning', 'Laundry Room', 'Security Cameras', 'Elevator', 'Rooftop Access', 'Parking', 'Study Room',
+  'Backup Generator', 'High-Speed Internet','Single Rooms','Quiet Hours Policy','Printing Station','Large Desks','Natural Lighting','Close to Campus','Common Area'];
 const TYPE_OPTIONS    = ['Single Studio', 'Single Room', 'Double Shared Room', 'Apartment', 'Luxury Apartment', 'Modern Studio'];
 const STATUS_OPTIONS  = ['Available Now', 'Coming Soon', 'Full'];
 const FURNISH_OPTIONS = ['Fully Furnished', 'Semi Furnished', 'Unfurnished'];

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Heart, MapPin, Star, Wifi, Zap, Snowflake, Home, ArrowUp,MessageCircle,Send, Sparkles, Calendar, Phone, ShieldAlert,  Dumbbell, Coffee, Shield, Truck, BookOpen, Car } from 'lucide-react';
+import { Heart, MapPin, Star, Wifi, Zap, Snowflake, Home, ArrowUp,MessageCircle,Send, Sparkles, Calendar, Phone, ShieldAlert,  Dumbbell, Coffee, Shield, Truck, BookOpen, Car,Globe, Server, BatteryCharging, BedSingle, Hospital, Printer, Users, Sun, Maximize, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button.jsx';
 import { Badge } from '@/components/ui/badge.jsx';
 import Header from '@/components/Header.jsx';
@@ -11,6 +11,7 @@ import PropertyInfoCard from '@/components/PropertyInfoCard';
 import PropertyCostSidebar from '@/components/PropertyCostSidebar';
 import PropertyLocation from '@/components/PropertyLocation';
 import axios from 'axios';
+
 
 const PROPERTY_DATA = {
   landlord: {
@@ -39,7 +40,7 @@ const AMENITY_ICONS = {
   "Laundry Room": MapPin,
   "Security Cameras": Shield,
   "Elevator": ArrowUp,
-  "Rooftop Access": Car,
+  "Rooftop Access": Building2,
   "Parking": Car,
   "Gym Access": Dumbbell,
   "Laundry Service": MapPin,
@@ -47,6 +48,19 @@ const AMENITY_ICONS = {
   "Meal Plan Options": Coffee,
   "University Shuttle": Truck,
   "Study Room Access": BookOpen,
+  
+  "High-Speed Internet":     Globe,
+  "Backup Generator":        BatteryCharging,
+  "Study Room":              BookOpen,
+  "Laptop-Friendly Desks":   Maximize,
+  "Quiet Hours Policy":      Server,    
+  "Single Rooms":            BedSingle,
+  "Close to Campus":         MapPin,
+  "Close to hospitals":      Hospital,
+  "Printing Station":        Printer,
+  "Common Area":             Users,
+  "Natural Lighting":        Sun,
+  "Large Desks":             Maximize,
 };
 
 

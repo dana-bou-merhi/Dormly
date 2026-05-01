@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, MessageCircle, Send, Phone, Star, ShieldAlert } from 'lucide-react';
+import { Calendar, MessageCircle, Send, Phone, Star, ShieldAlert, BadgePercent, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button.jsx';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
@@ -11,11 +11,24 @@ export default function PropertyCostSidebar({ price, baseRent, utilities, availa
   const [showMessageBox, setShowMessageBox] = useState(false);
   const [message, setMessage] = useState('');
   const {user} = useSelector(store =>store.auth);
+  // property cost breakdown states
+   const [yearlyPlan, setYearlyPlan] = useState(false); 
   //const canContact = user && user._id !== landlord?.user?._id;
   const isLoggedIn = !!user;
 const isOwner = user?._id === landlord?.user?._id;
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
   const navigate = useNavigate();
+
+   const isMonthly          = priceUnit === 'month';
+const discountRate       = 0.25;
+const monthlyBaseRent    = Number(baseRent) || 0;
+const discountedBaseRent = Math.round(monthlyBaseRent * (1 - discountRate));
+const displayBaseRent    = yearlyPlan ? discountedBaseRent : monthlyBaseRent;
+const displayTotal       = yearlyPlan
+  ? discountedBaseRent + (Number(utilities) || 0)
+  : Number(price) || 0;
+const yearlySaving       = Math.round(monthlyBaseRent * discountRate * 12);
+
 
   const handleSendMessage = async () => {
   if (!message.trim()) return;
@@ -46,20 +59,40 @@ const isOwner = user?._id === landlord?.user?._id;
 
   return (
     <aside className="space-y-6">
-      {/* Price Card */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm  top-24">
+      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm top-24">
+
+        {/* ── Price display ── */}
         <div className="mb-6">
-          <div className="flex items-end gap-1">
-            <span className="text-3xl font-bold text-teal-600">${price}</span>
-            <span className="text-gray-400 text-sm mb-1">/{priceUnit}</span>
+          <div className="flex items-end gap-2">
+            <span className="text-3xl font-bold text-teal-600">${displayTotal}</span>
+            <span className="text-gray-400 text-sm mb-1">/month</span>
+            {yearlyPlan && (
+              <span className="mb-1 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
+                25% off
+              </span>
+            )}
           </div>
-          <p className="text-xs text-gray-400 mt-1">Total Rent for Long Stay</p>
+          {yearlyPlan ? (
+            <p className="text-xs text-gray-400 mt-1">
+              Billed yearly —{' '}
+              <span className="font-semibold text-gray-600">${(displayTotal * 12).toLocaleString()} total</span>
+              <span className="line-through text-gray-300 ml-2">${(Number(price) * 12).toLocaleString()}</span>
+            </p>
+          ) : (
+            <p className="text-xs text-gray-400 mt-1">Total Rent</p>
+          )}
         </div>
 
-        <div className="space-y-3 text-sm mb-6">
+        {/* ── Price breakdown ── */}
+        <div className="space-y-3 text-sm mb-5">
           <div className="flex justify-between items-center text-gray-600">
             <span>Base Rent</span>
-            <span className="font-semibold">${baseRent}</span>
+            <span className="font-semibold flex items-center gap-2">
+              {yearlyPlan && (
+                <span className="line-through text-gray-300 font-normal text-xs">${monthlyBaseRent}</span>
+              )}
+              ${displayBaseRent}
+            </span>
           </div>
           <div className="flex justify-between items-center text-gray-600 pb-3 border-b border-gray-100">
             <span>Utility Estimates (water, electricity, wifi)</span>
@@ -67,21 +100,62 @@ const isOwner = user?._id === landlord?.user?._id;
           </div>
           <div className="flex justify-between items-center font-bold text-gray-800 pt-1">
             <span>Total Estimated</span>
-            <span>${price}</span>
+            <span className="flex items-center gap-2">
+              {yearlyPlan && (
+                <span className="line-through text-gray-300 font-normal text-xs">${price}</span>
+              )}
+              ${displayTotal}
+            </span>
           </div>
         </div>
 
+        {/* ── Yearly plan toggle (only if priceUnit is month) ── */}
+        {isMonthly && (
+          <button
+            type="button"
+            onClick={() => setYearlyPlan(!yearlyPlan)}
+            className={`w-full mb-5 rounded-xl border-2 p-3.5 transition-all text-left flex items-start gap-3 ${
+              yearlyPlan
+                ? 'border-emerald-500 bg-emerald-50'
+                : 'border-dashed border-gray-200 hover:border-teal-300 bg-gray-50 hover:bg-teal-50/30'
+            }`}
+          >
+            <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+              yearlyPlan ? 'border-emerald-500 bg-emerald-500' : 'border-gray-300'
+            }`}>
+              {yearlyPlan && <Check size={10} className="text-white" strokeWidth={3} />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={`text-sm font-bold ${yearlyPlan ? 'text-emerald-700' : 'text-gray-700'}`}>
+                  Pay Yearly & Save 25%
+                </span>
+                <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
+                  Save ${yearlySaving.toLocaleString()}
+                </span>
+              </div>
+              <p className="text-[11px] text-gray-400 mt-0.5">
+                ${discountedBaseRent}/mo base · billed as ${(displayTotal * 12).toLocaleString()}/year
+              </p>
+            </div>
+            <BadgePercent size={18} className={`shrink-0 mt-0.5 ${yearlyPlan ? 'text-emerald-500' : 'text-gray-300'}`} />
+          </button>
+        )}
+
+        {/* ── Available From ── */}
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex justify-between items-center mb-6">
           <div className="flex items-center gap-2 text-teal-600 font-medium text-sm">
             <Calendar size={16} /> Available from:
           </div>
           <span className="text-sm font-bold text-gray-800">{availableFrom}</span>
         </div>
-        
+
+        {/* ── Contact button ── */}
         {!showMessageBox && (
-          <Button onClick={() => { 
-            if (!isLoggedIn) {
-                toast.error("Please log in to be able to contact the landlord");
+          <Button
+            onClick={() => {
+              if (!isLoggedIn) {
+                toast.error("Please log in to contact the landlord");
                 navigate('/login');
                 return;
               }
@@ -90,12 +164,15 @@ const isOwner = user?._id === landlord?.user?._id;
                 return;
               }
               setShowMessageBox(true);
-            }} className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-teal-600/20 mb-6 flex items-center justify-center gap-2" >
+            }}
+            className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-teal-600/20 mb-6 flex items-center justify-center gap-2"
+          >
             <MessageCircle size={18} />
             Contact Landlord
           </Button>
         )}
 
+        {/* ── Message box ── */}
         {isLoggedIn && !isOwner && showMessageBox && (
           <div className="space-y-3 mb-6">
             <textarea
@@ -110,8 +187,7 @@ const isOwner = user?._id === landlord?.user?._id;
                 onClick={handleSendMessage}
                 className="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-lg flex items-center justify-center gap-2"
               >
-                <Send size={16} />
-                Send
+                <Send size={16} /> Send
               </Button>
               <Button
                 onClick={() => setShowMessageBox(false)}
@@ -124,9 +200,10 @@ const isOwner = user?._id === landlord?.user?._id;
           </div>
         )}
 
+        {/* ── Landlord info ── */}
         <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
-          <img 
-            src={landlord?.user?.profilePicture ||'/images/user.jpeg'}
+          <img
+            src={landlord?.user?.profilePicture || '/images/user.jpeg'}
             alt={landlord?.user?.username || 'Unknown'}
             className="w-10 h-10 rounded-full object-cover border border-gray-200"
           />
@@ -143,7 +220,7 @@ const isOwner = user?._id === landlord?.user?._id;
         </div>
       </div>
 
-      {/* Safety Alert */}
+      {/* ── Safety Alert ── */}
       <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
         <ShieldAlert size={20} className="text-blue-400 mt-1 shrink-0" />
         <div>

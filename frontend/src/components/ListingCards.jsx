@@ -267,7 +267,7 @@ export default function ListingCard({ listing }) {
     try {
       // The correct API path based on server.js and user.routes.js is:
       // app.use('/api/user', userRoute) + router.put("/favorites/:propertyId")
-      const response = await fetch(`${API_URL}/user/favorites/${_id}`, {
+      const response = await fetch(`${API_URL}/api/user/favorites/${_id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

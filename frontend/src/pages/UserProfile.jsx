@@ -91,6 +91,15 @@ const INQUIRY_STATUS = {
   },
 };
 
+const MAJOR_LABELS = {
+  cce:      'Engineering & CCE',
+  cs:       'Computer Science',
+  medical:  'Medical & Health',
+  business: 'Business & Finance',
+  arts:     'Arts & Design',
+  other:    'Other Programs',
+};
+
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-GB', {
@@ -257,6 +266,7 @@ useEffect(() => {
     university: user.university || "Lebanese University (UL)",
     bio: user.bio || "",
     role: user.role || "",
+    major:user.major || "",
     profilePicture: user.profilePicture || "/images/user.jpeg",
   };
 
@@ -287,6 +297,10 @@ useEffect(() => {
     formData.append("phone", draft.phone);
     formData.append("university", draft.university);
     formData.append("bio", draft.bio);
+    // new updated part 
+    if (profile.role === 'student') {
+    formData.append("major", draft.major);
+    }
 
     if (draft.profileFile) {
       formData.append("profilePicture", draft.profileFile);
@@ -392,6 +406,9 @@ useEffect(() => {
                   <InfoRow icon={Mail}     label="Email"       value={profile.email} />
                   <InfoRow icon={Phone}    label="Phone"       value={profile.phone} />
                   <InfoRow icon={School}   label="University"  value={profile.university} />
+                  {profile.role === 'student' && (
+                    <InfoRow icon={BookOpen} label="Major" value={MAJOR_LABELS[profile.major] || profile.major} />
+                  )}
                 </div>
 
                 {/* Edit / Cancel toggle */}
@@ -491,6 +508,32 @@ useEffect(() => {
                         </div>
                       </div>
                     </div>
+
+                    {profile.role === 'student' && (
+                      <div className="md:col-span-2">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">
+                          Major
+                        </label>
+                        <div className="relative">
+                          <select
+                            value={draft.major || ''}
+                            onChange={(e) => setDraft({ ...draft, major: e.target.value })}
+                            className="w-full px-4 py-2.5 pr-9 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition text-sm bg-white appearance-none"
+                          >
+                            <option value="">Select your major</option>
+                            <option value="cce">Engineering & CCE</option>
+                            <option value="cs">Computer Science</option>
+                            <option value="medical">Medical & Health</option>
+                            <option value="business">Business & Finance</option>
+                            <option value="arts">Arts & Design</option>
+                            <option value="other">Other Programs</option>
+                          </select>
+                          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                            <ArrowDown className="w-5 h-5 text-teal-600" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Bio */}
                     <div className="md:col-span-2">

@@ -8,12 +8,20 @@ import {
     createPropertyWithId,
     getLanlordListings,
 } from '../controllers/propertyController.js';
-import { isAuthenticated, isAdmin } from '../middleware/auth.middleware.js';
+import { isAuthenticated, isAdmin, optionalAuth } from '../middleware/auth.middleware.js';
 import { uploadPropertyImages } from '../middleware/propertyImages.js';
 
 const router = express.Router();
+// old good working route 
+//router.get('/', getProperties);
 
-router.get('/', getProperties);
+
+// instead of the above try this
+
+ router.get('/', optionalAuth, getProperties);
+
+
+
 router.get('/:id', getPropertyById);
 
 // Admin-only routes

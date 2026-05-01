@@ -1,6 +1,7 @@
 import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { MAJOR_AMENITY_MAP } from "../utils/major.amenity.js";
 
 export const register = async (req, res) => {
     const { username, email, password, role } = req.body;
@@ -123,7 +124,7 @@ export const updateProfile = async (req, res) => {
   try {
     const userId = req.user.id; // assuming auth middleware sets req.user
 
-    const { username, phone, university, bio } = req.body;
+    const { username, phone, university, bio, major } = req.body;
 
     const user = await User.findById(userId);
 
@@ -135,6 +136,8 @@ export const updateProfile = async (req, res) => {
     user.phone = phone || user.phone;
     user.university = university || user.university;
     user.bio = bio || user.bio;
+    // new added 
+    user.major = major || user.major; 
 
     // profile image
     if (req.file) {
@@ -154,3 +157,21 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+// new added part for major and amenity
+
+export const saveMajor = async (req, res) => {
+  try {
+    const { major } = req.body;
+    if (!major || major === 'skip') return res.json({ success: true });
+
+    await User.findByIdAndUpdate(req.user._id, { major });
+    res.json({ success: true });
+    console.log(`Saved major ${major} for user ${req.user._id}`);
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

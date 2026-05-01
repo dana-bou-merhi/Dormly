@@ -13,6 +13,8 @@ const userSchema = new mongoose.Schema({
     phone:          { type: String, default: '' },
     university:     { type: String, default: 'Lebanese University' },
     bio:            { type: String, default: '' },
+    // new added part 
+    major: { type: String, default: '' },
 }, { timestamps: true });
  
 // Only hash if password is set and modified

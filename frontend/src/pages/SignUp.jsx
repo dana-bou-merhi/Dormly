@@ -8,12 +8,15 @@ import { Button } from '@/components/ui/button.jsx';
 import { toast } from 'sonner';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+
  
 const SignUp = () => {
   const [role, setRole] = useState('student');
   const [showPassword, setShowPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  
+
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
  
@@ -98,7 +101,8 @@ const SignUp = () => {
  
     if(res.data.success){
       toast.success(res.data.message);
-      navigate('/login');
+     navigate('/login');
+    
     }
     
   } catch (error) {
@@ -107,6 +111,8 @@ const SignUp = () => {
   //  toast.error(error.response?.data?.message || "Registration failed. Please try again.");
   }
   };
+
+
  
   return (
     <div className="h-screen overflow-hidden flex">

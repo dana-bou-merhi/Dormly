@@ -1,5 +1,5 @@
 import express from "express";
-import { register, login, logout, updateProfile } from "../controllers/user.controller.js";
+import { register, login, logout, updateProfile, saveMajor } from "../controllers/user.controller.js";
 import { googleAuth, linkedinAuth } from "../controllers/auth.controller.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
 import { User } from "../models/user.model.js";
@@ -20,7 +20,11 @@ router.post("/auth/linkedin", linkedinAuth);
 router.get("/me", isAuthenticated, (req, res) => {
     res.status(200).json({ success: true, user: req.user });
 });
- 
+
+// new added route for the major 
+router.post('/major',isAuthenticated, saveMajor);
+
+
 // Update profile
 router.put("/update_profile", isAuthenticated, upload.single("profilePicture"), updateProfile);
  

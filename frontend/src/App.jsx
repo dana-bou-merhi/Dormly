@@ -9,7 +9,7 @@ import ListingsPage     from './pages/ListingsPage'
 import PropertyDetails  from './pages/PropertyDetails';
 import UserProfile      from './pages/UserProfile';
 import AdminDashboard   from './pages/AdminPage'
-import AddProperty      from './pages/AddProperty'
+
 import DormlyAi         from './pages/DormlyAi'
 import ChatbotButton    from './components/ChatbotButton'
 import { Toaster }      from './components/ui/sonner'
@@ -17,6 +17,8 @@ import FavoriteDorms    from './pages/FavoriteDorms'
 import NewAddProperty   from './pages/NewAddProperty';
 import LandlordListingsPage from './pages/LandlordListingPage';
 import LinkedInCallback from './pages/LinkedInCallback';
+import MajorOnboarding from './pages/MajorChoice';
+
  
 const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
  
@@ -47,8 +49,6 @@ function App() {
         <Route path="/property/:id"                element={<PropertyDetails />} />
         <Route path="/profile"                     element={<UserProfile />} />
         <Route path="/admin"                       element={<AdminDashboard />} />
-        <Route path="/admin/add-property"          element={<AddProperty />} />
-        <Route path="/admin/edit-property/:id"     element={<AddProperty />} />
         <Route path="/dormly-ai"                   element={<DormlyAi />} />
         <Route path="/favorite"                    element={<FavoriteDorms />} />
         <Route path="/new-prop"                    element={<NewAddProperty />} />
@@ -56,6 +56,8 @@ function App() {
         <Route path="/edit-property/:id"           element={<NewAddProperty />} />
         {/* LinkedIn OAuth callback */}
         <Route path="/auth/linkedin/callback"      element={<LinkedInCallback />} />
+       
+
       </Routes>
       <ChatbotButton />
       <Toaster />

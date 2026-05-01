@@ -29,3 +29,21 @@ export const isAdmin = (req, res, next) => {
     }
     next();
 };
+
+
+// new optional authentication function:
+export const optionalAuth = async (req, res, next) => {
+  try {
+    const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
+
+    if (!token) return next(); // no token → guest, just continue
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId).select('-password');
+
+    if (user) req.user = user; // set user if found, otherwise just continue
+    next();
+  } catch {
+    next(); // invalid/expired token → treat as guest, don't block
+  }
+};

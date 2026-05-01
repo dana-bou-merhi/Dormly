@@ -1,6 +1,10 @@
 import { Property } from '../models/property.model.js';
+import { User } from '../models/user.model.js';
+import { MAJOR_AMENITY_MAP } from '../utils/major.amenity.js';
 
 // ─── GET ALL PROPERTIES (with search + filter + pagination)
+/*
+prevous corrected working get properties without major part 
 export const getProperties = async (req, res) => {
     try {
         const {search, status, type, minPrice, maxPrice, location,   page = 1, limit = 10,  } = req.query;
@@ -45,6 +49,91 @@ export const getProperties = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to fetch properties.' });
     }
 };
+*/
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// new get function ckhecking user major and sorting by matching amenities
+export const getProperties = async (req, res) => {
+  try {
+    const { search, status, type, minPrice, maxPrice, location, page = 1, limit = 10 } = req.query;
+
+    const filter = {};
+    if (search) {
+      filter.$or = [
+        { title:       { $regex: search, $options: 'i' } },
+        { location:    { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+      ];
+    }
+    if (status)   filter.status = status;
+    if (type)     filter.type = type;
+    if (location) filter.location = { $regex: location, $options: 'i' };
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    const skip  = (Number(page) - 1) * Number(limit);
+    const total = await Property.countDocuments(filter);
+
+    // ── Derive preferred amenities from the user's major ──
+    let preferredAmenities = [];
+    if (req.user) {
+      const user = await User.findById(req.user._id).select('major');
+      if (user?.major && MAJOR_AMENITY_MAP[user.major]) {
+        preferredAmenities = MAJOR_AMENITY_MAP[user.major];
+      }
+    }
+
+    let properties;
+
+    if (preferredAmenities.length > 0) {
+      properties = await Property.aggregate([
+        { $match: filter },
+        {
+          $addFields: {
+            matchScore: {
+              $size: {
+                $filter: {
+                  input: { $ifNull: ['$amenityLabels', []] },
+                  as: 'a',
+                  cond: { $in: ['$$a', preferredAmenities] },
+                },
+              },
+            },
+          },
+        },
+        { $sort: { matchScore: -1, createdAt: -1 } },
+        { $skip: skip },
+        { $limit: Number(limit) },
+      ]);
+    } else {
+      // Guest or no major set — default
+      properties = await Property.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Number(limit));
+    }
+
+    res.status(200).json({
+      success: true,
+      count: properties.length,
+      total,
+      totalPages: Math.ceil(total / Number(limit)),
+      currentPage: Number(page),
+      properties,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Failed to fetch properties.' });
+  }
+};
+
+
+ /////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 // ─── GET SINGLE PROPERTY 
 export const getPropertyById = async (req, res) => {
