@@ -15,8 +15,8 @@ const signTokenAndRespond = (res, user) => {
         });
 };
 
-// ── Google OAuth ──────────────────────────────────────────────────────────────
-// Frontend sends the Google ID token after user clicks "Sign in with Google"
+// Google OAuth
+// Frontend sends the Google ID token 
 export const googleAuth = async (req, res) => {
     try {
         const { credential } = req.body;
@@ -66,7 +66,7 @@ export const googleAuth = async (req, res) => {
     }
 };
 
-// ── LinkedIn OAuth ────────────────────────────────────────────────────────────
+// LinkedIn OAuth
 // LinkedIn uses OAuth2 code flow. Frontend sends the authorization code,
 // backend exchanges it for an access token, then fetches the user profile.
 export const linkedinAuth = async (req, res) => {
@@ -74,7 +74,7 @@ export const linkedinAuth = async (req, res) => {
         const { code, redirectUri } = req.body;
         if (!code) return res.status(400).json({ success: false, message: 'No LinkedIn code provided.' });
 
-        // 1. Exchange code for access token
+        // Exchange code for access token
         const tokenRes = await fetch('https://www.linkedin.com/oauth/v2/accessToken', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -92,7 +92,7 @@ export const linkedinAuth = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Failed to get LinkedIn access token.' });
         }
 
-        // 2. Fetch LinkedIn profile (userinfo endpoint – works with OpenID Connect scope)
+        //  Fetch LinkedIn profile (userinfo endpoint – works with OpenID Connect scope)
         const profileRes = await fetch('https://api.linkedin.com/v2/userinfo', {
             headers: { Authorization: `Bearer ${tokenData.access_token}` },
         });
@@ -102,7 +102,7 @@ export const linkedinAuth = async (req, res) => {
 
         if (!email) return res.status(400).json({ success: false, message: 'Could not get email from LinkedIn. Make sure you have email scope enabled.' });
 
-        // 3. Find or create user
+        //  Find or create user
         let user = await User.findOne({ email });
 
         if (user) {

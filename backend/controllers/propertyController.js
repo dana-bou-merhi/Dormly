@@ -52,7 +52,7 @@ export const getProperties = async (req, res) => {
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// new get function ckhecking user major and sorting by matching amenities
+// new get function checking user major and sorting by matching amenities
 export const getProperties = async (req, res) => {
   try {
     const { search, status, type, minPrice, maxPrice, location, page = 1, limit = 10 } = req.query;
@@ -77,7 +77,7 @@ export const getProperties = async (req, res) => {
     const skip  = (Number(page) - 1) * Number(limit);
     const total = await Property.countDocuments(filter);
 
-    // ── Derive preferred amenities from the user's major ──
+    // ── Derive preferred amenities from the user's major 
     let preferredAmenities = [];
     if (req.user) {
       const user = await User.findById(req.user._id).select('major');
@@ -149,28 +149,6 @@ export const getPropertyById = async (req, res) => {
 };
 
 
-//UPDATE PROPERTY (Admin)
-/*
-export const updateProperty = async (req, res) => {
-    try {
-        const property = await Property.findByIdAndUpdate(
-            req.params.id,
-            { $set: req.body },
-            { new: true, runValidators: true }
-        );
-
-        if (!property) {
-            return res.status(404).json({ success: false, message: 'Property not found.' });
-        }
-
-        res.status(200).json({ success: true, message: 'Property updated successfully.', property });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Failed to update property.' });
-    }
-};
-*/
-
 export const updateProperty = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id);
@@ -191,7 +169,7 @@ export const updateProperty = async (req, res) => {
     const newImages = req.files?.map(  file => `${baseUrl}/uploads/properties/${file.filename}` ) || [];
 
     // Keep old images if no new ones uploaded
-   // const images = newImages.length > 0 ? newImages : property.images;
+   
    
    const images = [...property.images, ...newImages];
 
@@ -307,8 +285,6 @@ export const createPropertyWithId = async (req, res) => {
         if (user.role !== "landlord" && user.role!=="admin") {
             return res.status(403).json({ message: "Only landlords can add properties." });
         }
-
-       // const amenities       = req.body.amenities ? JSON.parse(req.body.amenities) : [];
        
         const amenityLabels   = req.body.amenityLabels ? JSON.parse(req.body.amenityLabels) : [];
         const nearbyAmenities = req.body.nearbyAmenities ? JSON.parse(req.body.nearbyAmenities) : [];

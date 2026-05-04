@@ -1,24 +1,6 @@
 import {Message} from "../models/messages.model.js";
 
 
-/*export const sendMessage = async (req, res) => {
-    const { propertyId, landlordId, content } = req.body;
-
-  if (!req.user) 
-    return res.status(401).json({ message: 'Not authenticated' });
-
-  if (req.user._id === landlordId) 
-    return res.status(400).json({ message: 'You cannot message yourself' });
-
-  const newMessage = await Message.create({
-    sender: req.user._id,
-    receiver: landlordId,
-    propertyId: propertyId,
-    content
-  });
-
-  res.status(201).json(newMessage);
-}*/
 export const sendMessage = async (req, res) => {
   try {
     const { propertyId, landlordId, content } = req.body;

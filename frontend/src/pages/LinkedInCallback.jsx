@@ -1,6 +1,4 @@
-// This page handles the LinkedIn OAuth redirect
-// LinkedIn sends the user back to /auth/linkedin/callback?code=...&state=...
-// We pass the code to Login which handles it via useSearchParams
+
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';

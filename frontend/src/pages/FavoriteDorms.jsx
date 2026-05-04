@@ -33,22 +33,50 @@ function EmptyState() {
 }
 
 export default function FavoritesPage() {
-  const user = useSelector(selectUser);
-  const dispatch = useDispatch();
+   const user = useSelector(selectUser);
+     const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const [favorites, setFavorites] = useState([]);
   const [sortBy, setSortBy] = useState('saved');
   const [filterType, setFilterType] = useState('all');
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingFavorites, setLoadingFavorites] = useState(true);
 
   // Redirect if not logged in
-  useEffect(() => { 
-    if (!user) navigate('/login'); 
+  useEffect(() => {
+    if (!user) navigate('/login');
   }, [user, navigate]);
 
-  // Guard: wait until favorites exist
-  const favorites = useMemo(() => user?.favorites || [], [user]);
+  // Fetch favorites
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        setLoadingFavorites(true);
 
+        const res = await fetch(`${API_URL}/api/user/favorites`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+
+          setFavorites(data.favorites);
+        } else {
+          toast.error("Failed to load favorites");
+        }
+      } catch (err) {
+        toast.error("Error fetching favorites");
+      } finally {
+        setLoadingFavorites(false);
+      }
+    };
+
+    if (user) fetchFavorites();
+  }, [user]);
+/*
   const handleRemove = async (propertyId) => {
     if (!propertyId) return; // skip if ID missing
     setIsLoading(true);
@@ -68,23 +96,69 @@ export default function FavoritesPage() {
     } finally {
       setIsLoading(false);
     }
+  };*/
+  
+
+  const handleRemove = async (propertyId) => {
+    if (!propertyId) return;
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(
+        `${API_URL}/api/user/favorites/${propertyId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        dispatch(setUser(data.user));
+      
+        setFavorites(data.user.favorites);
+        toast.success("Updated favorites");
+      }
+    } catch (error) {
+      toast.error("Failed to update favorite");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const filtered = useMemo(() => {
+
+    const filtered = useMemo(() => {
     let list = [...favorites];
+
     if (filterType !== 'all') {
-      list = list.filter(d => (d.type || '').toLowerCase().replace(/ /g, '-') === filterType);
+      list = list.filter(d =>
+        (d.type || '').toLowerCase().replace(/ /g, '-') === filterType
+      );
     }
+
     switch (sortBy) {
-      case 'price-asc': list.sort((a, b) => a.price - b.price); break;
-      case 'price-desc': list.sort((a, b) => b.price - a.price); break;
-      case 'rating': list.sort((a, b) => (b.rating || 0) - (a.rating || 0)); break;
-      default: list.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
+      case 'price-asc':
+        list.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-desc':
+        list.sort((a, b) => b.price - a.price);
+        break;
+      case 'rating':
+        list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      default:
+        list.sort((a, b) =>
+          new Date(b.updatedAt || b.createdAt) -
+          new Date(a.updatedAt || a.createdAt)
+        );
     }
+
     return list;
   }, [favorites, sortBy, filterType]);
 
-  if (!user) return null; // don't render until user exists
+  if (!user) return null;
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
@@ -135,16 +209,18 @@ export default function FavoritesPage() {
           )}
         </div>
 
-        {isLoading && (
+        {(loadingFavorites || isLoading) && (
           <div className="flex justify-center mb-4">
             <Loader2 className="animate-spin text-teal-600" size={24} />
           </div>
         )}
 
-        {favorites.length === 0 ? <EmptyState /> : (
+        {!loadingFavorites && favorites.length === 0 ? (
+          <EmptyState />
+        ) : (
           <div className="flex flex-col gap-4">
-            {filtered.map((dorm, index) =>
-              dorm._id ? (
+            {filtered.map((dorm) =>
+              dorm?._id ? (
                 <FavoriteListCard
                   key={dorm._id}
                   dorm={dorm}
@@ -154,6 +230,7 @@ export default function FavoritesPage() {
             )}
           </div>
         )}
+
       </main>
       <Footer />
       <ChatbotButton />

@@ -17,17 +17,18 @@ const userSchema = new mongoose.Schema({
     major: { type: String, default: '' },
 }, { timestamps: true });
  
+
 // Only hash if password is set and modified
 userSchema.pre('save', async function () {
-    // 1. Skip if password isn't modified OR if it's empty (OAuth users)
+    //  Skip if password isn't modified OR if it's empty (OAuth users)
     if (!this.isModified('password') || !this.password) return;
 
     try {
         const salt = await bcrypt.genSalt(10);
         this.password = await bcrypt.hash(this.password, salt);
-        // No next() needed here! Resolving the async function is enough.
+   
     } catch (error) {
-        // If there's an error, throw it; Mongoose will catch it.
+     
         throw error;
     }
 });

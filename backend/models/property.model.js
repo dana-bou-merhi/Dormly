@@ -26,8 +26,8 @@ const propertySchema = new mongoose.Schema({
     rank:        { type: Number },
 
     // ── Amenities (card labels + detail icons in one) ──
-    amenityLabels: [{ type: String }],        // ["24/7 Elec", "WiFi", "Furnished"] for home page
-    amenities: [{ type: String }],       // ["24/7 Solar Panel 10A", "Fiber WiFi", "Air Conditioning"] — for detail page
+    amenityLabels: [{ type: String }],        // ["24/7 Elec", "WiFi", "Furnished"] for home page view 
+    amenities: [{ type: String }],       // ["24/7 Solar Panel 10A", "Fiber WiFi", "Air Conditioning"]  for detail page
 
     package: { type: String, default:'essential' },
     nearbyAmenities: [
@@ -42,17 +42,6 @@ const propertySchema = new mongoose.Schema({
         verified:     { type: Boolean, default: false },
         responseTime: { type: String, default: '' },
     },
-
-    // ── Student Reviews ──
-   /* studentReviews: [
-      {
-        author:    { type: String },
-        rating:    { type: Number, min: 1, max: 5 },
-        text:      { type: String },
-        avatar:    { type: String },
-        createdAt: { type: Date, default: Date.now },
-      },
-    ],*/
 
 },{ timestamps: true })
 

@@ -16,19 +16,17 @@ const router = express.Router();
 //router.get('/', getProperties);
 
 
-// instead of the above try this
+// instead of the above try this to accept guest and asks for major
 
  router.get('/', optionalAuth, getProperties);
-
-
-
 router.get('/:id', getPropertyById);
 
-// Admin-only routes
-router.put('/updateproperty/:id', isAuthenticated,uploadPropertyImages.array('images'), updateProperty);
 
+// Admin routes
+router.put('/updateproperty/:id', isAuthenticated,uploadPropertyImages.array('images'), updateProperty);
 router.delete('/:id', isAuthenticated, deleteProperty);
 router.get('/admin/stats', isAuthenticated, isAdmin, getPropertyStats);
+
 
 
 // landlords

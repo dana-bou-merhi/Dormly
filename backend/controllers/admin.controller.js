@@ -1,7 +1,7 @@
 import { User } from '../models/user.model.js';
 import { Property } from '../models/property.model.js';
 
-// ─── GET ALL USERS ─────────────────────────────────────────────────────────────
+// GET ALL USERS 
 export const getAllUsers = async (req, res) => {
     try {
         const { search, role, page = 1, limit = 10 } = req.query;
@@ -38,7 +38,7 @@ export const getAllUsers = async (req, res) => {
     }
 };
 
-// ─── GET SINGLE USER ──────────────────────────────────────────────────────────
+// GET SINGLE USER 
 export const getUserById = async (req, res) => {
     try {
         const user = await User.findById(req.params.id).select('-password').populate('favorites');
@@ -51,7 +51,7 @@ export const getUserById = async (req, res) => {
     }
 };
 
-// ─── UPDATE USER ROLE ─────────────────────────────────────────────────────────
+// UPDATE USER ROLE 
 export const updateUserRole = async (req, res) => {
     try {
         const { role } = req.body;
@@ -80,7 +80,7 @@ export const updateUserRole = async (req, res) => {
     }
 };
 
-// ─── DELETE USER ──────────────────────────────────────────────────────────────
+// DELETE USER 
 export const deleteUser = async (req, res) => {
     try {
         if (req.params.id === req.user._id.toString()) {
@@ -98,14 +98,11 @@ export const deleteUser = async (req, res) => {
     }
 };
 
-// ─── FULL DASHBOARD OVERVIEW STATS ───────────────────────────────────────────
+//  FULL DASHBOARD OVERVIEW STATS 
 export const getDashboardStats = async (req, res) => {
     try {
-        const [
-            totalUsers, totalStudents, totalLandlords, totalAdmins,
-            totalProperties, availableProperties, fullProperties, comingSoonProperties,
-            newUsersThisMonth, newPropertiesThisMonth,
-        ] = await Promise.all([
+        const [  totalUsers, totalStudents, totalLandlords, totalAdmins,  totalProperties, availableProperties, fullProperties, comingSoonProperties,
+            newUsersThisMonth, newPropertiesThisMonth, ] = await Promise.all([
             User.countDocuments(),
             User.countDocuments({ role: 'student' }),
             User.countDocuments({ role: 'landlord' }),

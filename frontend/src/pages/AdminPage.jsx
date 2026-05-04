@@ -16,24 +16,7 @@ import { setUser } from '../redux/authSlice';
 import axios from 'axios';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
 const API = import.meta.env.VITE_API_URL;
-/*
-// ─── Reusable stat card ───────────────────────────────────────────────────────
-function StatCard({ label, value, icon: Icon, bgColor, iconColor, sub }) {
-    return (
-        <Card className="p-6 border-slate-200">
-            <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 ${bgColor} rounded-lg flex items-center justify-center ${iconColor}`}>
-                    <Icon size={24} />
-                </div>
-                <div>
-                    <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider">{label}</p>
-                    <h3 className="text-2xl font-bold text-slate-900">{value ?? '—'}</h3>
-                    {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
-                </div>
-            </div>
-        </Card>
-    );
-}*/
+
 
 function StatCard({ label, value, icon: Icon, bgColor, iconColor, sub }) {
     return (
@@ -54,7 +37,9 @@ function StatCard({ label, value, icon: Icon, bgColor, iconColor, sub }) {
     );
 }
 
-// ─── Status badge ─────────────────────────────────────────────────────────────
+//  Status badge 
+
+
 function StatusBadge({ status }) {
     const map = {
         'Available Now': 'bg-emerald-100 text-emerald-700',

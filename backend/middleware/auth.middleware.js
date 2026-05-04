@@ -31,7 +31,7 @@ export const isAdmin = (req, res, next) => {
 };
 
 
-// new optional authentication function:
+// new optional authentication function for major part 
 export const optionalAuth = async (req, res, next) => {
   try {
     const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];

@@ -7,7 +7,7 @@ export const register = async (req, res) => {
     const { username, email, password, role } = req.body;
 
     try {
-        // 1. Validation
+       
         if (!username || !email || !password || !role) {
             return res.status(400).json({
                 success: false,
@@ -30,7 +30,7 @@ export const register = async (req, res) => {
             });
         }
 
-        // 2. Check for existing user
+        
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({
@@ -88,7 +88,7 @@ export const login = async (req, res) => {
             });
         }
 
-        // Create token using the .env variable
+        // Generate JWT token
         const token = jwt.sign(
             { userId: user._id },
             process.env.JWT_SECRET, 
@@ -122,7 +122,7 @@ export const logout = async(_, res)=>{
 
 export const updateProfile = async (req, res) => {
   try {
-    const userId = req.user.id; // assuming auth middleware sets req.user
+    const userId = req.user.id; 
 
     const { username, phone, university, bio, major } = req.body;
 
@@ -142,7 +142,7 @@ export const updateProfile = async (req, res) => {
     // profile image
     if (req.file) {
       user.profilePicture = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
-      //req.file.path;
+      
     }
 
     const updatedUser = await user.save();
@@ -175,3 +175,40 @@ export const saveMajor = async (req, res) => {
   }
 };
 
+export const getUserFavorites = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).populate("favorites");
+
+    if (!user) {
+      return res.status(404).json({  success: false,  message: "User not found", });
+    }
+
+    res.status(200).json({   success: true,  favorites: user.favorites,  });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Failed to fetch favorites", });
+  }
+};
+
+export const addToFavorite = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        const propertyId = req.params.propertyId;
+        const isFav = user.favorites.some(id => id.toString() === propertyId);
+ 
+        if (isFav) {
+            user.favorites = user.favorites.filter(id => id.toString() !== propertyId);
+        } else {
+            user.favorites.push(propertyId);
+        }
+ 
+        await user.save();
+        const updated = await User.findById(user._id)
+            .select("-password")
+            .populate("favorites");
+        res.status(200).json({ success: true, user: updated });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Failed to update favorites." });
+    }
+}

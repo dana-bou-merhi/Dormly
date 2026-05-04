@@ -25,7 +25,7 @@ export default function Login() {
   const [searchParams] = useSearchParams();
   const [showMajorModal, setShowMajorModal] = useState(false);
  
-  // ── Handle LinkedIn callback code in URL ──────────────────────────────────
+  // Handle LinkedIn callback code in URL 
   useEffect(() => {
     const code  = searchParams.get('code');
     const state = searchParams.get('state');
@@ -35,7 +35,7 @@ export default function Login() {
     }
   }, [searchParams]);
  
-  // ── Load Google Identity Services script ──────────────────────────────────
+  // Load Google Identity Services script 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) return;
     const script = document.createElement('script');
@@ -70,7 +70,7 @@ export default function Login() {
       const major = res.data.user?.major;
 
       if (role === 'student' && !major) {
-        setShowMajorModal(true); // ← show modal
+        setShowMajorModal(true); 
       } else {
         navigate(role === 'admin' ? '/admin' : '/');
       }
@@ -131,7 +131,7 @@ console.log("FINAL URL:", url);
     }
   };
  
-  // ── Email/password login ──────────────────────────────────────────────────
+  // Email/password login 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -167,11 +167,7 @@ console.log("FINAL URL:", url);
   const handleMajorSelect = async (selectedMajor) => {
   if (selectedMajor !== 'skip') {
     try {
-      await axios.post(
-        `${API_URL}/api/user/major`,
-        { major: selectedMajor },
-        { withCredentials: true }
-      );
+      await axios.post(  `${API_URL}/api/user/major`, { major: selectedMajor },  { withCredentials: true } );
     } catch {
       toast.error("Couldn't save major, you can set it later in profile settings.");
     }

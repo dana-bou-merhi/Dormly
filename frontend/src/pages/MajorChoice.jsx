@@ -14,7 +14,7 @@ const MajorChoice = ({ onSelect }) => {
   ];
 
   return (
-    <div className="bg-white rounded-2xl w-full max-w-[440px] shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in zoom-in duration-300">
+    <div className="bg-white rounded-2xl w-full max-w-110 shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in zoom-in duration-300">
       {/* Header */}
       <div className="p-8 pb-6 text-center">
         <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-50 text-teal-600 mb-4">
