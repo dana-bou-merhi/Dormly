@@ -114,38 +114,45 @@ export const getUserConversations = async (req, res) => {
 
     const conversationsMap = new Map();
 
-    for (let msg of messages) {
-      const isSender = msg.sender._id.toString() === userId.toString();
+   for (let msg of messages) {
 
-      const otherUser = isSender ? msg.receiver : msg.sender;
+  // skip broken messages
+  if (!msg.sender || !msg.receiver || !msg.propertyId) {
+    continue;
+  }
 
-      const key = `${msg.propertyId._id}_${otherUser._id}`;
+  const isSender =
+    msg.sender._id.toString() === userId.toString();
 
-      if (!conversationsMap.has(key)) {
-        conversationsMap.set(key, {
-          id: msg._id ,//key,
+  const otherUser = isSender ? msg.receiver : msg.sender;
 
-          user: {
-            _id: otherUser._id,
-            username: otherUser.username,
-           // profilePicture: otherUser.profilePicture
-          },
+  if (!otherUser) continue;
 
-          property: {
-            _id: msg.propertyId._id,
-            title: msg.propertyId.title,
-            location: msg.propertyId.location,
-            image: msg.propertyId.images?.[0]
-          },
+  const key = `${msg.propertyId._id}_${otherUser._id}`;
 
-          
-          lastMessage: msg.content,
-          sentAt: msg.createdAt,
-        status: msg.status || "pending",
-         isMine: isSender 
-        });
-      }
-    }
+  if (!conversationsMap.has(key)) {
+    conversationsMap.set(key, {
+      id: msg._id,
+
+      user: {
+        _id: otherUser._id,
+        username: otherUser.username,
+      },
+
+      property: {
+        _id: msg.propertyId._id,
+        title: msg.propertyId.title,
+        location: msg.propertyId.location,
+        image: msg.propertyId.images?.[0],
+      },
+
+      lastMessage: msg.content,
+      sentAt: msg.createdAt,
+      status: msg.status || "pending",
+      isMine: isSender,
+    });
+  }
+}
 
     const conversations = Array.from(conversationsMap.values());
 

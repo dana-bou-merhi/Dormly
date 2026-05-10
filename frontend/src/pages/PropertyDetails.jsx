@@ -216,12 +216,12 @@ export default function PropertyDetails() {
                 {PROPERTY_DATA.studentReviews.map((review) => (
                   <div key={review.id} className="pb-5 border-b border-gray-100 last:border-0">
                     <div className="flex items-start gap-4">
-                      <Link to="/profile"> 
+                     
                       <img
                         src={review.avatar}
                         alt={review.author}
                         className="w-10 h-10 rounded-full object-cover shrink-0"
-                      /> </Link>
+                      /> 
                       <div className="flex-1">
                         <h4 className="font-bold text-sm text-gray-900 mb-2">{review.author}</h4>
                         <div className="flex gap-0.5 mb-2">{renderStars(review.rating)}</div>

@@ -156,7 +156,63 @@ function AmenityBadge({ amenity }) {
       bg: "bg-cyan-50 border-cyan-200",
       text: "text-cyan-700",
       icon: "❄️"
-    }
+    },
+    "High-Speed Internet": {
+      bg: "bg-blue-50 border-blue-200",
+      text: "text-gray-700",
+      icon: "🌐"
+    },
+    "Backup Generator": {
+      bg: "bg-yellow-50 border-yellow-200",
+      text: "text-yellow-700",
+      icon: "🔋"
+    },
+    "Study Room": {
+      bg: "bg-indigo-50 border-indigo-200",
+      text: "text-indigo-700",
+      icon: "📚"
+    },
+    "Laptop-Friendly Desks": {
+      bg: "bg-gray-50 border-gray-200",
+      text: "text-gray-700",
+      icon: "💻"
+    },
+    "Quiet Hours Policy": {
+      bg: "bg-slate-50 border-slate-200",
+      text: "text-slate-600",
+      icon: "🔇"
+    },
+    "Single Rooms": {
+      bg: "bg-pink-50 border-pink-200",
+      text: "text-pink-700",
+      icon: "🛏️"
+    },
+    "Close to Campus": {
+      bg: "bg-green-50 border-green-200",
+      text: "text-green-700",
+      icon: "📍"
+    },
+    "Close to hospitals": {
+      bg: "bg-red-50 border-red-200",
+      text: "text-red-700",
+      icon: "🏥"
+    },
+    "Printing Station": {
+      bg: "bg-gray-50 border-gray-200",
+      text: "text-gray-700",
+      icon: "🖨️"
+    },
+    "Common Area": {
+      bg: "bg-orange-50 border-orange-200",
+      text: "text-orange-700",
+      icon: "👥"
+    },
+    "Natural Lighting": {
+      bg: "bg-yellow-50 border-yellow-200",
+      text: "text-yellow-700",
+      icon: "☀️"
+    },
+    
   };
 
   const c =
